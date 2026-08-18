@@ -106,7 +106,9 @@ width:62px;
 height:54px;
 font-weight:bold;
 box-shadow:0 4px 0 #351078;
-touch-action:manipulation;
+touch-action:none;
+user-select:none;
+-webkit-user-select:none;
 }
 
 button:active{
@@ -322,26 +324,16 @@ context.globalAlpha=1;
 }
 
 function drawMatrix(context,matrix,offset,size=BLOCK,alpha=1){
-
 matrix.forEach((row,y)=>{
 row.forEach((value,x)=>{
 if(value){
-drawBlock(
-context,
-x+offset.x,
-y+offset.y,
-value,
-size,
-alpha
-);
+drawBlock(context,x+offset.x,y+offset.y,value,size,alpha);
 }
 });
 });
-
 }
 
 function drawGrid(){
-
 ctx.strokeStyle="#ffffff0b";
 ctx.lineWidth=1;
 
@@ -358,80 +350,42 @@ ctx.moveTo(0,y*BLOCK);
 ctx.lineTo(COLS*BLOCK,y*BLOCK);
 ctx.stroke();
 }
-
 }
 
 function draw(){
-
 ctx.fillStyle="#0d1728";
 ctx.fillRect(0,0,canvas.width,canvas.height);
 
 drawGrid();
-
 drawMatrix(ctx,board,{x:0,y:0});
 
 if(player){
-
-const ghost={
-x:player.pos.x,
-y:player.pos.y
-};
-
+const ghost={x:player.pos.x,y:player.pos.y};
 while(!collisionAt(player.matrix,ghost.x,ghost.y+1)){
 ghost.y++;
 }
 
-drawMatrix(
-ctx,
-player.matrix,
-ghost,
-BLOCK,
-.18
-);
-
-drawMatrix(
-ctx,
-player.matrix,
-player.pos
-);
-
+drawMatrix(ctx,player.matrix,ghost,BLOCK,.18);
+drawMatrix(ctx,player.matrix,player.pos);
 }
-
 }
 
 function drawNext(){
-
-nextCtx.clearRect(
-0,0,
-nextCanvas.width,
-nextCanvas.height
-);
+nextCtx.clearRect(0,0,nextCanvas.width,nextCanvas.height);
 
 const size=18;
-
 const width=nextPiece[0].length*size;
 const height=nextPiece.length*size;
-
 const ox=(nextCanvas.width-width)/2/size;
 const oy=(nextCanvas.height-height)/2/size;
 
-drawMatrix(
-nextCtx,
-nextPiece,
-{x:ox,y:oy},
-size
-);
-
+drawMatrix(nextCtx,nextPiece,{x:ox,y:oy},size);
 }
 
 function collisionAt(matrix,px,py){
-
 for(let y=0;y<matrix.length;y++){
-
 for(let x=0;x<matrix[y].length;x++){
-
 if(matrix[y][x]){
-
 const bx=x+px;
 const by=y+py;
 
@@ -443,42 +397,27 @@ by>=ROWS||
 ){
 return true;
 }
-
 }
-
 }
-
 }
-
 return false;
 }
 
 function collide(){
-return collisionAt(
-player.matrix,
-player.pos.x,
-player.pos.y
-);
+return collisionAt(player.matrix,player.pos.x,player.pos.y);
 }
 
 function merge(){
-
 player.matrix.forEach((row,y)=>{
-
 row.forEach((value,x)=>{
-
 if(value){
 board[y+player.pos.y][x+player.pos.x]=value;
 }
-
 });
-
 });
-
 }
 
 function move(dir){
-
 if(paused||gameOver)return;
 
 player.pos.x+=dir;
@@ -491,283 +430,240 @@ draw();
 }
 
 function rotate(){
-
 if(paused||gameOver)return;
 
 const oldMatrix=player.matrix;
 const oldX=player.pos.x;
 
 player.matrix=
-player.matrix[0].map(
-(_,i)=>player.matrix.map(row=>row[i]).reverse()
-);
+player.matrix[0].map((_,i)=>player.matrix.map(row=>row[i]).reverse());
 
 let offset=1;
 
 while(collide()){
-
 player.pos.x+=offset;
-
 offset=-(offset+(offset>0?1:-1));
 
 if(Math.abs(offset)>player.matrix[0].length){
-
 player.matrix=oldMatrix;
 player.pos.x=oldX;
 return;
-
 }
-
 }
 
 draw();
 }
 
 function softDrop(){
-
 if(paused||gameOver)return;
 
 player.pos.y++;
 
 if(collide()){
-
 player.pos.y--;
-
 lockPiece();
-
 }else{
-
 score+=1;
 updateStats();
-
 }
 
 dropCounter=0;
 }
 
 function hardDrop(){
-
 if(paused||gameOver)return;
 
 let distance=0;
 
-while(!collisionAt(
-player.matrix,
-player.pos.x,
-player.pos.y+1
-)){
+while(!collisionAt(player.matrix,player.pos.x,player.pos.y+1)){
 player.pos.y++;
 distance++;
 }
 
 score+=distance*2;
-
 lockPiece();
 }
 
 function lockPiece(){
-
 merge();
-
 clearLines();
-
 newPlayer();
-
 updateStats();
-
 dropCounter=0;
 }
 
 function clearLines(){
-
 let cleared=0;
 
 outer:
 for(let y=ROWS-1;y>=0;y--){
-
 for(let x=0;x<COLS;x++){
-
 if(board[y][x]===0){
 continue outer;
 }
-
 }
 
 board.splice(y,1);
-
-board.unshift(
-Array(COLS).fill(0)
-);
-
+board.unshift(Array(COLS).fill(0));
 y++;
 cleared++;
-
 }
 
 if(cleared){
-
 lines+=cleared;
 
-const points=[
-0,
-100,
-300,
-500,
-800
-];
+const points=[0,100,300,500,800];
+score+=(points[cleared]||cleared*250)*level;
+level=Math.floor(lines/10)+1;
 
-score+=
-(points[cleared]||cleared*250)
-*level;
-
-level=
-Math.floor(lines/10)+1;
-
-navigator.vibrate?.(
-cleared>=4?[80,40,120]:40
-);
-
+navigator.vibrate?.(cleared>=4?[80,40,120]:40);
 }
-
 }
 
 function updateStats(){
-
 document.getElementById("score").textContent=score;
 document.getElementById("lines").textContent=lines;
 document.getElementById("level").textContent=level;
 
 if(score>highScore){
-
 highScore=score;
-
-localStorage.setItem(
-"blockrushHigh",
-highScore
-);
-
+localStorage.setItem("blockrushHigh",highScore);
 document.getElementById("high").textContent=highScore;
 }
-
 }
 
 function dropInterval(){
-
-return Math.max(
-120,
-700-(level-1)*60
-);
-
+return Math.max(120,700-(level-1)*60);
 }
 
 function endGame(){
-
 gameOver=true;
-
 document.getElementById("finalScore").textContent=score;
-
 document.getElementById("message").style.display="flex";
-
 navigator.vibrate?.([100,70,160]);
 }
 
 function restartGame(){
-
+stopAllHoldControls();
 board=makeBoard();
-
 score=0;
 lines=0;
 level=1;
-
 paused=false;
 gameOver=false;
-
 nextPiece=randomPiece();
 
 document.getElementById("message").style.display="none";
-
 document.getElementById("pause").textContent="⏸ PAUSE";
 
 newPlayer();
-
 updateStats();
-
 draw();
 }
 
 function togglePause(){
-
 if(gameOver)return;
-
 paused=!paused;
-
-document.getElementById("pause").textContent=
-paused?"▶ RESUME":"⏸ PAUSE";
-
+stopAllHoldControls();
+document.getElementById("pause").textContent=paused?"▶ RESUME":"⏸ PAUSE";
 }
 
 function update(time=0){
-
 const delta=time-lastTime;
-
 lastTime=time;
 
 if(!paused&&!gameOver){
-
 dropCounter+=delta;
-
 if(dropCounter>dropInterval()){
-
 softDrop();
-
 }
-
 }
 
 draw();
-
 requestAnimationFrame(update);
 }
 
 function bindButton(id,action){
-
 const el=document.getElementById(id);
 
-el.addEventListener(
-"pointerdown",
-e=>{
+el.addEventListener("pointerdown",e=>{
 e.preventDefault();
 action();
-}
-);
-
+});
 }
 
-bindButton("left",()=>move(-1));
-bindButton("right",()=>move(1));
+const holdControls=[];
+
+function bindHoldButton(id,dir){
+const el=document.getElementById(id);
+let holdTimeout=null;
+let repeatInterval=null;
+let pointerId=null;
+
+function stop(){
+if(holdTimeout!==null){
+clearTimeout(holdTimeout);
+holdTimeout=null;
+}
+
+if(repeatInterval!==null){
+clearInterval(repeatInterval);
+repeatInterval=null;
+}
+
+pointerId=null;
+}
+
+function start(e){
+e.preventDefault();
+stop();
+pointerId=e.pointerId;
+
+try{el.setPointerCapture(pointerId);}catch(_){ }
+
+move(dir);
+
+holdTimeout=setTimeout(()=>{
+repeatInterval=setInterval(()=>{
+move(dir);
+},65);
+},170);
+}
+
+el.addEventListener("pointerdown",start);
+el.addEventListener("pointerup",stop);
+el.addEventListener("pointercancel",stop);
+el.addEventListener("lostpointercapture",stop);
+el.addEventListener("contextmenu",e=>e.preventDefault());
+
+holdControls.push(stop);
+}
+
+function stopAllHoldControls(){
+holdControls.forEach(stop=>stop());
+}
+
+bindHoldButton("left",-1);
+bindHoldButton("right",1);
 bindButton("rotate",rotate);
 bindButton("drop",hardDrop);
 bindButton("pause",togglePause);
 bindButton("restart",restartGame);
 
+document.addEventListener("pointerup",stopAllHoldControls);
+document.addEventListener("pointercancel",stopAllHoldControls);
+window.addEventListener("blur",stopAllHoldControls);
+
 document.addEventListener("keydown",e=>{
-
 if(e.key==="ArrowLeft")move(-1);
-
 if(e.key==="ArrowRight")move(1);
-
 if(e.key==="ArrowDown")softDrop();
-
 if(e.key==="ArrowUp")rotate();
-
 if(e.code==="Space")hardDrop();
-
 if(e.key.toLowerCase()==="p")togglePause();
-
 });
 
 restartGame();
-
 requestAnimationFrame(update);
 
 </script>
