@@ -1,7 +1,24 @@
 import crypto from 'crypto';
 
-export const GAME_SHORT_NAME = 'blockrushsuper';
-export const GAME_URL = 'https://rawhitz.github.io/blockrush/';
+export const GAMES = {
+  blockrushsuper: {
+    shortName: 'blockrushsuper',
+    url: 'https://rawhitz.github.io/blockrush/',
+    title: 'BLOCKRUSH',
+  },
+  ludorush: {
+    shortName: 'ludorush',
+    url: 'https://rawhitz.github.io/blockrush/ludorush/',
+    title: 'LUDORUSH',
+  },
+};
+
+export const GAME_SHORT_NAME = GAMES.blockrushsuper.shortName;
+export const GAME_URL = GAMES.blockrushsuper.url;
+
+export function getGame(shortName) {
+  return GAMES[shortName] || null;
+}
 
 export function getBotToken() {
   const token = process.env.BLOCKRUSH_BOT_TOKEN;
