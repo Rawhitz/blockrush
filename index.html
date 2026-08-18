@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>BLOCKRUSH</title>
+
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+
+body{
+margin:0;
+background:radial-gradient(circle at top,#210044,#07000f 60%);
+color:#fff;
+font-family:Arial,sans-serif;
+text-align:center;
+min-height:100vh;
+overflow:hidden;
+}
+
+h1{
+margin:8px 0 2px;
+font-size:27px;
+letter-spacing:2px;
+}
+
+.sub{
+font-size:10px;
+letter-spacing:3px;
+opacity:.7;
+margin-bottom:6px;
+}
+
+.stats{
+display:flex;
+justify-content:center;
+gap:8px;
+margin-bottom:6px;
+}
+
+.stat{
+background:#16072b;
+border:1px solid #5b21b6;
+border-radius:9px;
+padding:5px 10px;
+min-width:72px;
+}
+
+.label{
+font-size:9px;
+opacity:.65;
+}
+
+.value{
+font-size:16px;
+font-weight:bold;
+}
+
+.gamewrap{
+display:flex;
+justify-content:center;
+gap:8px;
+align-items:flex-start;
+}
+
+canvas#game{
+background:#0d1728;
+border:3px solid #00d9ff;
+box-shadow:0 0 15px #00d9ff55;
+width:min(66vw,300px);
+height:auto;
+}
+
+.side{
+width:74px;
+}
+
+.sidebox{
+background:#16072b;
+border:1px solid #5b21b6;
+border-radius:10px;
+padding:6px;
+margin-bottom:8px;
+font-size:10px;
+}
+
+#next{
+width:60px;
+height:60px;
+}
+
+.controls{
+display:flex;
+justify-content:center;
+gap:7px;
+margin-top:8px;
+}
+
+button{
+border:none;
+border-radius:12px;
+background:#5b21b6;
+color:white;
+font-size:25px;
+width:62px;
+height:54px;
+font-weight:bold;
+box-shadow:0 4px 0 #351078;
+touch-action:manipulation;
+}
+
+button:active{
+transform:translateY(3px);
+box-shadow:0 1px 0 #351078;
+}
+
+#drop{background:#f97316;box-shadow:0 4px 0 #a84305}
+
+.smallcontrols{
+display:flex;
+justify-content:center;
+gap:8px;
+margin-top:7px;
+}
+
+.smallcontrols button{
+font-size:12px;
+width:105px;
+height:34px;
+}
+
+#message{
+position:fixed;
+inset:0;
+display:none;
+align-items:center;
+justify-content:center;
+background:#000a;
+z-index:5;
+}
+
+.popup{
+background:#16072b;
+border:2px solid #8b5cf6;
+border-radius:18px;
+padding:25px;
+width:270px;
+box-shadow:0 0 35px #7c3aed;
+}
+
+.popup h2{
+margin-top:0;
+font-size:27px;
+}
+
+.popup button{
+width:150px;
+font-size:16px;
+margin-top:10px;
+}
+</style>
+</head>
+
+<body>
+
+<h1>BLOCKRUSH</h1>
+<div class="sub">STACK • SMASH • SURVIVE</div>
+
+<div class="stats">
+<div class="stat">
+<div class="label">SCORE</div>
+<div class="value" id="score">0</div>
+</div>
+
+<div class="stat">
+<div class="label">LINES</div>
+<div class="value" id="lines">0</div>
+</div>
+
+<div class="stat">
+<div class="label">LEVEL</div>
+<div class="value" id="level">1</div>
+</div>
+</div>
+
+<div class="gamewrap">
+
+<canvas id="game" width="300" height="600"></canvas>
+
+<div class="side">
+
+<div class="sidebox">
+NEXT
+<canvas id="next" width="90" height="90"></canvas>
+</div>
+
+<div class="sidebox">
+HIGH<br>
+<strong id="high">0</strong>
+</div>
+
+</div>
+</div>
+
+<div class="controls">
+<button id="left">◀</button>
+<button id="rotate">↻</button>
+<button id="right">▶</button>
+<button id="drop">⇩</button>
+</div>
+
+<div class="smallcontrols">
+<button id="pause">⏸ PAUSE</button>
+<button id="restart">↻ RESTART</button>
+</div>
+
+<div id="message">
+<div class="popup">
+<h2>GAME OVER</h2>
+<p>Score</p>
+<h1 id="finalScore">0</h1>
+<button onclick="restartGame()">PLAY AGAIN</button>
+</div>
+</div>
+
+<script>
+
+const canvas=document.getElementById("game");
+const ctx=canvas.getContext("2d");
+
+const nextCanvas=document.getElementById("next");
+const nextCtx=nextCanvas.getContext("2d");
+
+const COLS=10;
+const ROWS=20;
+const BLOCK=30;
+
+let board;
+let player;
+let nextPiece;
+
+let score=0;
+let lines=0;
+let level=1;
+
+let dropCounter=0;
+let lastTime=0;
+let paused=false;
+let gameOver=false;
+
+let highScore=Number(localStorage.getItem("blockrushHigh")||0);
+
+document.getElementById("high").textContent=highScore;
+
+const colors=[
+null,
+"#00e5ff",
+"#ffe600",
+"#b44cff",
+"#2cff72",
+"#ff3b4f",
+"#388cff",
+"#ff8c18"
+];
+
+const pieces=[
+[[1,1,1,1]],
+[[2,2],[2,2]],
+[[0,3,0],[3,3,3]],
+[[0,4,4],[4,4,0]],
+[[5,5,0],[0,5,5]],
+[[6,0,0],[6,6,6]],
+[[0,0,7],[7,7,7]]
+];
+
+function makeBoard(){
+return Array.from({length:ROWS},()=>Array(COLS).fill(0));
+}
+
+function randomPiece(){
+const p=pieces[Math.floor(Math.random()*pieces.length)];
+return p.map(r=>[...r]);
+}
+
+function newPlayer(){
+player={
+matrix:nextPiece||randomPiece(),
+pos:{x:0,y:0}
+};
+
+nextPiece=randomPiece();
+
+player.pos.x=
+Math.floor(COLS/2)-
+Math.floor(player.matrix[0].length/2);
+
+drawNext();
+
+if(collide()){
+endGame();
+}
+}
+
+function drawBlock(context,x,y,value,size=BLOCK,alpha=1){
+context.globalAlpha=alpha;
+
+context.fillStyle=colors[value];
+context.fillRect(x*size,y*size,size,size);
+
+context.strokeStyle="#ffffff33";
+context.strokeRect(x*size,y*size,size,size);
+
+context.fillStyle="#ffffff20";
+context.fillRect(
+x*size+3,
+y*size+3,
+size-6,
+Math.max(3,size*.14)
+);
+
+context.globalAlpha=1;
+}
+
+function drawMatrix(context,matrix,offset,size=BLOCK,alpha=1){
+
+matrix.forEach((row,y)=>{
+row.forEach((value,x)=>{
+if(value){
+drawBlock(
+context,
+x+offset.x,
+y+offset.y,
+value,
+size,
+alpha
+);
+}
+});
+});
+
+}
+
+function drawGrid(){
+
+ctx.strokeStyle="#ffffff0b";
+ctx.lineWidth=1;
+
+for(let x=0;x<=COLS;x++){
+ctx.beginPath();
+ctx.moveTo(x*BLOCK,0);
+ctx.lineTo(x*BLOCK,ROWS*BLOCK);
+ctx.stroke();
+}
+
+for(let y=0;y<=ROWS;y++){
+ctx.beginPath();
+ctx.moveTo(0,y*BLOCK);
+ctx.lineTo(COLS*BLOCK,y*BLOCK);
+ctx.stroke();
+}
+
+}
+
+function draw(){
+
+ctx.fillStyle="#0d1728";
+ctx.fillRect(0,0,canvas.width,canvas.height);
+
+drawGrid();
+
+drawMatrix(ctx,board,{x:0,y:0});
+
+if(player){
+
+const ghost={
+x:player.pos.x,
+y:player.pos.y
+};
+
+while(!collisionAt(player.matrix,ghost.x,ghost.y+1)){
+ghost.y++;
+}
+
+drawMatrix(
+ctx,
+player.matrix,
+ghost,
+BLOCK,
+.18
+);
+
+drawMatrix(
+ctx,
+player.matrix,
+player.pos
+);
+
+}
+
+}
+
+function drawNext(){
+
+nextCtx.clearRect(
+0,0,
+nextCanvas.width,
+nextCanvas.height
+);
+
+const size=18;
+
+const width=nextPiece[0].length*size;
+const height=nextPiece.length*size;
+
+const ox=(nextCanvas.width-width)/2/size;
+const oy=(nextCanvas.height-height)/2/size;
+
+drawMatrix(
+nextCtx,
+nextPiece,
+{x:ox,y:oy},
+size
+);
+
+}
+
+function collisionAt(matrix,px,py){
+
+for(let y=0;y<matrix.length;y++){
+
+for(let x=0;x<matrix[y].length;x++){
+
+if(matrix[y][x]){
+
+const bx=x+px;
+const by=y+py;
+
+if(
+bx<0||
+bx>=COLS||
+by>=ROWS||
+(by>=0&&board[by][bx])
+){
+return true;
+}
+
+}
+
+}
+
+}
+
+return false;
+}
+
+function collide(){
+return collisionAt(
+player.matrix,
+player.pos.x,
+player.pos.y
+);
+}
+
+function merge(){
+
+player.matrix.forEach((row,y)=>{
+
+row.forEach((value,x)=>{
+
+if(value){
+board[y+player.pos.y][x+player.pos.x]=value;
+}
+
+});
+
+});
+
+}
+
+function move(dir){
+
+if(paused||gameOver)return;
+
+player.pos.x+=dir;
+
+if(collide()){
+player.pos.x-=dir;
+}
+
+draw();
+}
+
+function rotate(){
+
+if(paused||gameOver)return;
+
+const oldMatrix=player.matrix;
+const oldX=player.pos.x;
+
+player.matrix=
+player.matrix[0].map(
+(_,i)=>player.matrix.map(row=>row[i]).reverse()
+);
+
+let offset=1;
+
+while(collide()){
+
+player.pos.x+=offset;
+
+offset=-(offset+(offset>0?1:-1));
+
+if(Math.abs(offset)>player.matrix[0].length){
+
+player.matrix=oldMatrix;
+player.pos.x=oldX;
+return;
+
+}
+
+}
+
+draw();
+}
+
+function softDrop(){
+
+if(paused||gameOver)return;
+
+player.pos.y++;
+
+if(collide()){
+
+player.pos.y--;
+
+lockPiece();
+
+}else{
+
+score+=1;
+updateStats();
+
+}
+
+dropCounter=0;
+}
+
+function hardDrop(){
+
+if(paused||gameOver)return;
+
+let distance=0;
+
+while(!collisionAt(
+player.matrix,
+player.pos.x,
+player.pos.y+1
+)){
+player.pos.y++;
+distance++;
+}
+
+score+=distance*2;
+
+lockPiece();
+}
+
+function lockPiece(){
+
+merge();
+
+clearLines();
+
+newPlayer();
+
+updateStats();
+
+dropCounter=0;
+}
+
+function clearLines(){
+
+let cleared=0;
+
+outer:
+for(let y=ROWS-1;y>=0;y--){
+
+for(let x=0;x<COLS;x++){
+
+if(board[y][x]===0){
+continue outer;
+}
+
+}
+
+board.splice(y,1);
+
+board.unshift(
+Array(COLS).fill(0)
+);
+
+y++;
+cleared++;
+
+}
+
+if(cleared){
+
+lines+=cleared;
+
+const points=[
+0,
+100,
+300,
+500,
+800
+];
+
+score+=
+(points[cleared]||cleared*250)
+*level;
+
+level=
+Math.floor(lines/10)+1;
+
+navigator.vibrate?.(
+cleared>=4?[80,40,120]:40
+);
+
+}
+
+}
+
+function updateStats(){
+
+document.getElementById("score").textContent=score;
+document.getElementById("lines").textContent=lines;
+document.getElementById("level").textContent=level;
+
+if(score>highScore){
+
+highScore=score;
+
+localStorage.setItem(
+"blockrushHigh",
+highScore
+);
+
+document.getElementById("high").textContent=highScore;
+}
+
+}
+
+function dropInterval(){
+
+return Math.max(
+120,
+700-(level-1)*60
+);
+
+}
+
+function endGame(){
+
+gameOver=true;
+
+document.getElementById("finalScore").textContent=score;
+
+document.getElementById("message").style.display="flex";
+
+navigator.vibrate?.([100,70,160]);
+}
+
+function restartGame(){
+
+board=makeBoard();
+
+score=0;
+lines=0;
+level=1;
+
+paused=false;
+gameOver=false;
+
+nextPiece=randomPiece();
+
+document.getElementById("message").style.display="none";
+
+document.getElementById("pause").textContent="⏸ PAUSE";
+
+newPlayer();
+
+updateStats();
+
+draw();
+}
+
+function togglePause(){
+
+if(gameOver)return;
+
+paused=!paused;
+
+document.getElementById("pause").textContent=
+paused?"▶ RESUME":"⏸ PAUSE";
+
+}
+
+function update(time=0){
+
+const delta=time-lastTime;
+
+lastTime=time;
+
+if(!paused&&!gameOver){
+
+dropCounter+=delta;
+
+if(dropCounter>dropInterval()){
+
+softDrop();
+
+}
+
+}
+
+draw();
+
+requestAnimationFrame(update);
+}
+
+function bindButton(id,action){
+
+const el=document.getElementById(id);
+
+el.addEventListener(
+"pointerdown",
+e=>{
+e.preventDefault();
+action();
+}
+);
+
+}
+
+bindButton("left",()=>move(-1));
+bindButton("right",()=>move(1));
+bindButton("rotate",rotate);
+bindButton("drop",hardDrop);
+bindButton("pause",togglePause);
+bindButton("restart",restartGame);
+
+document.addEventListener("keydown",e=>{
+
+if(e.key==="ArrowLeft")move(-1);
+
+if(e.key==="ArrowRight")move(1);
+
+if(e.key==="ArrowDown")softDrop();
+
+if(e.key==="ArrowUp")rotate();
+
+if(e.code==="Space")hardDrop();
+
+if(e.key.toLowerCase()==="p")togglePause();
+
+});
+
+restartGame();
+
+requestAnimationFrame(update);
+
+</script>
+
+</body>
+</html>
