@@ -1,4 +1,4 @@
-import { GAME_SHORT_NAME, GAME_URL, signLaunch, telegram } from './_lib.js';
+import { GAME_SHORT_NAME, GAME_URL, signLaunch, telegram, webhookSecret } from './_lib.js';
 
 function launchUrlForCallback(q) {
   const data = {
@@ -18,6 +18,11 @@ function launchUrlForCallback(q) {
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(200).json({ ok: true, service: 'BLOCKRUSH Telegram webhook' });
+  }
+
+  const suppliedSecret = req.headers['x-telegram-bot-api-secret-token'];
+  if (suppliedSecret !== webhookSecret()) {
+    return res.status(401).json({ ok: false, error: 'Invalid webhook secret' });
   }
 
   try {
