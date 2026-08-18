@@ -28,6 +28,13 @@ function signingKey() {
   return crypto.createHash('sha256').update(getBotToken()).digest();
 }
 
+export function webhookSecret() {
+  return crypto
+    .createHash('sha256')
+    .update(`${getBotToken()}:blockrush-webhook`)
+    .digest('hex');
+}
+
 export function signLaunch(data) {
   const payload = Buffer.from(JSON.stringify(data)).toString('base64url');
   const sig = crypto.createHmac('sha256', signingKey()).update(payload).digest('base64url');
