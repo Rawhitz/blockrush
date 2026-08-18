@@ -21,19 +21,12 @@ function launchUrlForCallback(q) {
 }
 
 async function sendGame(chatId, shortName) {
-  await telegram('sendGame', {
-    chat_id: chatId,
-    game_short_name: shortName,
-  });
+  await telegram('sendGame', { chat_id: chatId, game_short_name: shortName });
 }
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
-    return res.status(200).json({
-      ok: true,
-      service: 'RawHitz Telegram games webhook',
-      games: Object.keys(GAMES),
-    });
+    return res.status(200).json({ ok: true, service: 'RawHitz Telegram games webhook', games: Object.keys(GAMES) });
   }
 
   const suppliedSecret = req.headers['x-telegram-bot-api-secret-token'];
@@ -51,16 +44,18 @@ export default async function handler(req, res) {
       if (text === '/start' || text.startsWith('/start@')) {
         await telegram('sendMessage', {
           chat_id: chatId,
-          text: '🎮 Welcome!\n\n/blockrush — play BLOCKRUSH\n/ludo — play LUDORUSH\n/games — show both games',
+          text: '🎮 Welcome!\n\n/blockrush — play BLOCKRUSH\n/ludo — play LUDORUSH\n/snake — play SNAKERUSH\n/games — show all games',
         });
       } else if (text === '/game' || text.startsWith('/game@') || text === '/blockrush' || text.startsWith('/blockrush@')) {
         await sendGame(chatId, 'blockrushsuper');
       } else if (text === '/ludo' || text.startsWith('/ludo@') || text === '/ludorush' || text.startsWith('/ludorush@')) {
         await sendGame(chatId, 'ludorush');
+      } else if (text === '/snake' || text.startsWith('/snake@') || text === '/snakerush' || text.startsWith('/snakerush@')) {
+        await sendGame(chatId, 'snakerush');
       } else if (text === '/games' || text.startsWith('/games@')) {
         await telegram('sendMessage', {
           chat_id: chatId,
-          text: '🎮 Choose a game:\n\n🧱 /blockrush — Stack. Smash. Survive!\n🎲 /ludo — Roll. Race. Win!',
+          text: '🎮 Choose a game:\n\n🧱 /blockrush — Stack. Smash. Survive!\n🎲 /ludo — Roll. Race. Win!\n🐍 /snake — Climb ladders. Dodge snakes. Race to 100!',
         });
       }
     }
@@ -68,26 +63,20 @@ export default async function handler(req, res) {
     if (update.callback_query?.game_short_name) {
       const q = update.callback_query;
       if (getGame(q.game_short_name)) {
-        await telegram('answerCallbackQuery', {
-          callback_query_id: q.id,
-          url: launchUrlForCallback(q),
-        });
+        await telegram('answerCallbackQuery', { callback_query_id: q.id, url: launchUrlForCallback(q) });
       }
     }
 
     if (update.inline_query) {
       const q = (update.inline_query.query || '').toLowerCase();
-      let gameNames = ['blockrushsuper', 'ludorush'];
+      let gameNames = ['blockrushsuper', 'ludorush', 'snakerush'];
       if (q.includes('ludo')) gameNames = ['ludorush'];
       if (q.includes('block')) gameNames = ['blockrushsuper'];
+      if (q.includes('snake')) gameNames = ['snakerush'];
 
       await telegram('answerInlineQuery', {
         inline_query_id: update.inline_query.id,
-        results: gameNames.map(shortName => ({
-          type: 'game',
-          id: `${shortName}_game`,
-          game_short_name: shortName,
-        })),
+        results: gameNames.map(shortName => ({ type: 'game', id: `${shortName}_game`, game_short_name: shortName })),
         cache_time: 0,
         is_personal: true,
       });
