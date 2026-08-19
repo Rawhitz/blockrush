@@ -26,6 +26,11 @@ export const GAMES = {
     url: 'https://rawhitz.github.io/blockrush/cricketrush-v6/',
     title: 'CRICKETRUSH 3D',
   },
+  spacerush: {
+    shortName: 'spacerush',
+    url: 'https://rawhitz.github.io/blockrush/spacerush/',
+    title: 'SPACE RUSH',
+  },
 };
 
 export const GAME_SHORT_NAME = GAMES.blockrushsuper.shortName;
