@@ -44,7 +44,7 @@ export default async function handler(req, res) {
       if (text === '/start' || text.startsWith('/start@')) {
         await telegram('sendMessage', {
           chat_id: chatId,
-          text: '🎮 Welcome!\n\n/blockrush — play BLOCKRUSH\n/ludo — play LUDORUSH\n/snake — play SNAKERUSH\n/garden — play SNAKE GARDEN\n/cricket — play CRICKETRUSH 3D\n/games — show all games',
+          text: '🎮 Welcome!\n\n/blockrush — play BLOCKRUSH\n/ludo — play LUDORUSH\n/snake — play SNAKERUSH\n/garden — play SNAKE GARDEN\n/cricket — play CRICKETRUSH 3D\n/space — play SPACE RUSH\n/games — show all games',
         });
       } else if (text === '/game' || text.startsWith('/game@') || text === '/blockrush' || text.startsWith('/blockrush@')) {
         await sendGame(chatId, 'blockrushsuper');
@@ -56,10 +56,12 @@ export default async function handler(req, res) {
         await sendGame(chatId, 'snakegarden');
       } else if (text === '/cricket' || text.startsWith('/cricket@') || text === '/cricketrush' || text.startsWith('/cricketrush@')) {
         await sendGame(chatId, 'cricketrush');
+      } else if (text === '/space' || text.startsWith('/space@') || text === '/spacerush' || text.startsWith('/spacerush@')) {
+        await sendGame(chatId, 'spacerush');
       } else if (text === '/games' || text.startsWith('/games@')) {
         await telegram('sendMessage', {
           chat_id: chatId,
-          text: '🎮 Choose a game:\n\n🧱 /blockrush — Stack. Smash. Survive!\n🎲 /ludo — Roll. Race. Win!\n🐍 /snake — Climb ladders. Dodge snakes. Race to 100!\n🌿 /garden — Classic Snake in a living garden!\n🏏 /cricket — Bat, bowl and play in 3D!',
+          text: '🎮 Choose a game:\n\n🧱 /blockrush — Stack. Smash. Survive!\n🎲 /ludo — Roll. Race. Win!\n🐍 /snake — Climb ladders. Dodge snakes. Race to 100!\n🌿 /garden — Classic Snake in a living garden!\n🏏 /cricket — Bat, bowl and play in 3D!\n🚀 /space — Blast. Dodge. Survive!',
         });
       }
     }
@@ -73,12 +75,13 @@ export default async function handler(req, res) {
 
     if (update.inline_query) {
       const q = (update.inline_query.query || '').toLowerCase();
-      let gameNames = ['blockrushsuper', 'ludorush', 'snakerush', 'snakegarden', 'cricketrush'];
+      let gameNames = ['blockrushsuper', 'ludorush', 'snakerush', 'snakegarden', 'cricketrush', 'spacerush'];
       if (q.includes('ludo')) gameNames = ['ludorush'];
       if (q.includes('block')) gameNames = ['blockrushsuper'];
       if (q.includes('garden')) gameNames = ['snakegarden'];
       else if (q.includes('snake')) gameNames = ['snakerush', 'snakegarden'];
       if (q.includes('cricket')) gameNames = ['cricketrush'];
+      if (q.includes('space')) gameNames = ['spacerush'];
 
       await telegram('answerInlineQuery', {
         inline_query_id: update.inline_query.id,
