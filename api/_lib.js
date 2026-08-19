@@ -23,7 +23,7 @@ export const GAMES = {
   },
   cricketrush: {
     shortName: 'cricketrush',
-    url: 'https://rawhitz.github.io/blockrush/cricketrush-v4/',
+    url: 'https://rawhitz.github.io/blockrush/cricketrush-v5/',
     title: 'CRICKETRUSH 3D',
   },
 };
