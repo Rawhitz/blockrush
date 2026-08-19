@@ -30,6 +30,13 @@ export default async function handler(req, res) {
       console.error('getGameHighScores before update failed:', e.message);
     }
 
+    const mine = highscores.find(x => Number(x.user?.id) === Number(data.user_id));
+    const current = Number(mine?.score || 0);
+
+    if (mode === 'cricket_get') {
+      return res.status(200).json({ ok: true, rating: current, highscores });
+    }
+
     let numericScore;
     let earned = 0;
 
@@ -38,9 +45,6 @@ export default async function handler(req, res) {
       if (!Number.isInteger(earned) || earned < 0 || earned > 5000) {
         throw new Error('Invalid CricketRush rating delta');
       }
-
-      const mine = highscores.find(x => Number(x.user?.id) === Number(data.user_id));
-      const current = Number(mine?.score || 0);
       numericScore = current + earned;
     } else {
       numericScore = Number(score);
