@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>CricketRush 3D v6</title>
+<style>
+html,body{margin:0;min-height:100%;background:#02050d;color:#fff;font-family:Arial,sans-serif}#gameFrame{display:block;width:100%;min-height:100vh;border:0;background:#02050d}.syncToast{position:fixed;left:50%;bottom:14px;transform:translateX(-50%) translateY(20px);z-index:9999;background:#07172eee;border:1px solid #ffd23f66;color:#fff;border-radius:14px;padding:10px 14px;font-size:12px;box-shadow:0 12px 40px #000b;opacity:0;pointer-events:none;transition:.25s;max-width:90vw;text-align:center}.syncToast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+<iframe id="gameFrame" title="CricketRush 3D"></iframe>
+<div id="toast" class="syncToast"></div>
+<script>
+const BACKEND='https://blockrush-backend.vercel.app';
+const launch=new URLSearchParams(location.search).get('launch')||'';
+const frame=document.getElementById('gameFrame');
+frame.src='../cricketrush-v5/'+location.search;
+let rating=Number(localStorage.getItem('cricketrush_rating_cache')||0);
+let selectedOvers=3,matchStarted=false,submitted=false,autoUsed=false,chaseSeen=false;
+let maxBatRuns=0,maxBowlWkts=0,maxBowlRuns=0,maxBowlBalls=0,fours=0,sixes=0,lastBannerKey='';
+let records=readRecords();
+function readRecords(){try{return JSON.parse(localStorage.getItem('cricketrush_records_v1')||'{}')}catch{return{}}}
+function saveRecords(){localStorage.setItem('cricketrush_records_v1',JSON.stringify(records))}
+function recFor(n){if(!records[n])records[n]={matches:0,wins:0,bestBat:0,bestBowling:0,bestEarned:0};return records[n]}
+function toast(t){const e=document.getElementById('toast');e.textContent=t;e.classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove('show'),2800)}
+async function api(body){if(!launch)throw new Error('No Telegram launch token');const r=await fetch(BACKEND+'/api/score',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({launch,...body})});const d=await r.json();if(!r.ok||!d.ok)throw new Error(d.error||'Sync failed');return d}
+async function loadRating(){if(!launch)return;try{const d=await api({mode:'cricket_get'});rating=Number(d.rating||0);localStorage.setItem('cricketrush_rating_cache',rating);updatePanels()}catch(e){console.warn('CR lookup failed',e.message)}}
+function injectPanels(){let d;try{d=frame.contentDocument}catch{return}if(!d)return;const css=d.createElement('style');css.textContent='.crbox{margin:8px auto;padding:9px 10px;border-radius:13px;background:linear-gradient(135deg,#182b47,#0b1728);border:1px solid #ffd23f55;display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;text-align:center;font-size:9px;box-shadow:0 8px 24px #0006}.crbox b{display:block;font-size:15px;color:#ffd84d;margin-top:2px}.crbox .wide{grid-column:1/-1;font-size:10px;opacity:.72}.crEarn{color:#7dff94!important}';d.head.appendChild(css);
+  [['menu','menuCR'],['game','gameCR']].forEach(([id,bid])=>{const host=d.getElementById(id);if(host&&!d.getElementById(bid)){const box=d.createElement('div');box.id=bid;box.className='crbox';const brand=host.querySelector('.brand');if(brand&&brand.nextSibling)host.insertBefore(box,brand.nextSibling);else host.prepend(box)}});updatePanels()}
+function updatePanels(extra=''){let d;try{d=frame.contentDocument}catch{return}if(!d)return;const r=recFor(selectedOvers);const html=`<div>CR RATING<b>${rating}</b></div><div>${selectedOvers} OV BEST<b>${r.bestBat||0}</b></div><div>BEST BOWL<b>${r.bestBowling||0} W</b></div><div class="wide">${r.wins||0} wins • ${r.matches||0} matches${extra?' • '+extra:''}</div>`;['menuCR','gameCR'].forEach(id=>{const e=d.getElementById(id);if(e)e.innerHTML=html})}
+function resetTrackers(){matchStarted=true;submitted=false;autoUsed=false;chaseSeen=false;maxBatRuns=0;maxBowlWkts=0;maxBowlRuns=0;maxBowlBalls=0;fours=0;sixes=0;lastBannerKey=''}
+function num(el){return Number(el?.textContent||0)||0}
+function poll(){let d;try{d=frame.contentDocument}catch{return}if(!d)return;const game=d.getElementById('game'),menu=d.getElementById('menu'),ballEl=d.getElementById('ballNo'),status=d.getElementById('status');
+  if(frame.style.height!==d.documentElement.scrollHeight+'px')frame.style.height=Math.max(innerHeight,d.documentElement.scrollHeight)+'px';
+  const den=(ballEl?.textContent||'').split('/')[1];if(den)selectedOvers=Math.round(Number(den)/6)||selectedOvers;else{const active=d.querySelector('.overbtn.active');if(active)selectedOvers=parseInt(active.textContent)||selectedOvers}
+  const gameVisible=game&&!game.classList.contains('hidden');const balls=Number((ballEl?.textContent||'0/0').split('/')[0])||0;
+  if(gameVisible&&balls===0&&!matchStarted)resetTrackers();
+  if(!gameVisible&&matchStarted){matchStarted=false;submitted=false}
+  if(gameVisible&&balls>0&&!matchStarted)resetTrackers();
+  const bat=d.getElementById('batControls'),bowl=d.getElementById('bowlControls');const playerBatting=bat&&!bat.classList.contains('hidden'),playerBowling=bowl&&!bowl.classList.contains('hidden');
+  if(playerBatting)maxBatRuns=Math.max(maxBatRuns,num(d.getElementById('runs')));
+  if(playerBowling){maxBowlWkts=Math.max(maxBowlWkts,num(d.getElementById('wkts')));maxBowlRuns=Math.max(maxBowlRuns,num(d.getElementById('runs')));maxBowlBalls=Math.max(maxBowlBalls,balls)}
+  if((d.getElementById('autoBtn')?.textContent||'').includes('ON'))autoUsed=true;
+  if(playerBatting&&(d.getElementById('phaseLabel')?.textContent||'').includes('CHASE'))chaseSeen=true;
+  const banner=d.getElementById('banner');if(playerBatting&&banner?.classList.contains('show')){const key=balls+':'+banner.textContent;if(key!==lastBannerKey){lastBannerKey=key;if(banner.textContent.includes('FOUR'))fours++;if(banner.textContent.includes('SIX'))sixes++}}
+  const st=status?.textContent||'';if(matchStarted&&!submitted&&st.includes('Match complete.')){submitted=true;finishRating(st.includes('YOU WIN!'))}
+  updatePanels();
+}
+function calcEarned(win){const base=win?100:25;const econ=maxBowlBalls>=6?(maxBowlRuns/(maxBowlBalls/6)):99;const econBonus=maxBowlBalls>=6?Math.max(0,30-Math.round(econ*3)):0;const chaseBonus=win&&chaseSeen?20:0;const mult={3:1,5:1.15,10:1.30,12:1.40,15:1.50,20:1.65}[selectedOvers]||1;let pts=base+maxBatRuns+fours*2+sixes*4+maxBowlWkts*12+econBonus+chaseBonus;pts=Math.round(pts*mult);if(autoUsed)pts=Math.max(10,Math.round(pts*.5));return Math.max(1,pts)}
+async function finishRating(win){const earned=calcEarned(win),r=recFor(selectedOvers);r.matches++;if(win)r.wins++;if(!autoUsed)r.bestBat=Math.max(r.bestBat||0,maxBatRuns);r.bestBowling=Math.max(r.bestBowling||0,maxBowlWkts);r.bestEarned=Math.max(r.bestEarned||0,earned);saveRecords();updatePanels(`this match +${earned} CR${autoUsed?' • Auto ×0.5':''}`);
+  if(!launch){rating+=earned;localStorage.setItem('cricketrush_rating_cache',rating);updatePanels(`+${earned} CR • local only`);return}
+  try{const d=await api({mode:'cricket',delta:earned});rating=Number(d.rating||rating+earned);localStorage.setItem('cricketrush_rating_cache',rating);updatePanels(`+${earned} CR • synced`);toast(`🏆 +${earned} CR • Rating ${rating}`)}catch(e){console.warn('CR sync failed',e.message);toast('CR saved locally, Telegram sync failed');rating+=earned;localStorage.setItem('cricketrush_rating_cache',rating);updatePanels(`+${earned} CR • local cache`)}
+}
+frame.addEventListener('load',()=>{injectPanels();loadRating();setInterval(poll,120)});
+</script>
+</body>
+</html>
