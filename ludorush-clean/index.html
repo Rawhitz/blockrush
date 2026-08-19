@@ -1,0 +1,9 @@
+<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no"><title>LudoRush</title></head><body style="margin:0;background:#07142b;color:white;font-family:Arial;text-align:center"><p style="margin-top:40vh">Loading LudoRush…</p><script>
+fetch('../ludorush/index.html?v=clean').then(r=>r.text()).then(html=>{
+  html=html.replace(/<div class="modegrid"><button class="mode" onclick="showColors\(\)">[\s\S]*?<\/button><button class="mode secondary" onclick="showMulti\(\)">[\s\S]*?<\/button><\/div>/,'<div class="modegrid"><button class="mode" onclick="showColors()">🤖 SINGLE PLAYER</button></div>');
+  html=html.replace(/<div id="multiInfo" class="hidden">[\s\S]*?<\/div><div class="rulebox">/,'<div class="rulebox">');
+  html=html.replace('.modegrid,.colors{display:grid;grid-template-columns:1fr 1fr;gap:10px}', '.modegrid,.colors{display:grid;grid-template-columns:1fr 1fr;gap:10px}.modegrid{grid-template-columns:1fr}');
+  html=html.replace(/function showMulti\(\)[\s\S]*?function hideChoices\(\)/,'function hideChoices()');
+  document.open();document.write(html);document.close();
+}).catch(()=>{document.body.innerHTML='<h2>LudoRush failed to load</h2><p>Please reopen the game.</p>'});
+</script></body></html>
