@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>Snake Garden</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{margin:0;min-height:100%;font-family:Arial,sans-serif;background:radial-gradient(circle at top,#173c24,#07170d 68%);color:#fff;text-align:center;overflow-x:hidden}body{padding:8px 8px 24px}.hidden{display:none!important}.wrap{width:min(96vw,620px);margin:auto}.brand{font-weight:1000;font-size:31px;letter-spacing:1px;margin:4px 0 0;background:linear-gradient(90deg,#dcff59,#4dff71,#13d87a);-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:0 0 26px #45ff6a33}.sub{font-size:10px;letter-spacing:4px;opacity:.76;margin:1px 0 9px}.panel{background:linear-gradient(180deg,#143920ee,#0a2414ee);border:1px solid #b8ffad2d;border-radius:22px;padding:15px;box-shadow:0 18px 55px #0008,0 0 26px #4cff6b1f}.modegrid{display:grid;gap:10px}.mode{border:0;border-radius:16px;padding:14px;color:white;text-align:left;font-weight:900;font-size:15px;box-shadow:0 5px 0 #0006;touch-action:manipulation}.mode small{display:block;margin-top:4px;font-size:11px;font-weight:500;opacity:.8}.wall{background:linear-gradient(135deg,#7d6a50,#4d4031)}.open{background:linear-gradient(135deg,#139c75,#0d6a90)}.maze{background:linear-gradient(135deg,#7042b5,#3f286e)}.top{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:7px}.stat{background:#081d10e8;border:1px solid #b7ffb526;border-radius:13px;padding:6px 3px;font-size:9px}.stat strong{display:block;font-size:15px;margin-top:2px}.gardenwrap{position:relative}.glow{position:absolute;inset:-4px;border-radius:22px;background:linear-gradient(90deg,#78ff50,#edff54,#33d39b,#78ff50);background-size:250% 100%;animation:flow 5s linear infinite;filter:blur(7px);opacity:.65;z-index:-1}@keyframes flow{to{background-position:250% 0}}canvas{display:block;width:100%;height:auto;border:4px solid #d6ffb8;border-radius:19px;box-shadow:0 18px 55px #0009;background:#2d7c36;touch-action:none}.status{margin:8px 0 7px;background:#092016e8;border:1px solid #c8ffb824;border-radius:13px;padding:9px;font-size:12px;min-height:38px;display:flex;align-items:center;justify-content:center}.controls{display:grid;grid-template-columns:74px 74px 74px;grid-template-rows:58px 58px;justify-content:center;gap:6px;margin-top:6px}.ctrl{border:0;border-radius:15px;background:linear-gradient(180deg,#5dba35,#297d2f);color:#fff;font-size:27px;font-weight:bold;box-shadow:0 4px 0 #174a21;touch-action:none;user-select:none}.ctrl:active{transform:translateY(3px);box-shadow:0 1px 0 #174a21}.up{grid-column:2}.left{grid-column:1;grid-row:2}.down{grid-column:2;grid-row:2}.right{grid-column:3;grid-row:2}.row{display:flex;gap:8px;margin-top:10px}.smallbtn{flex:1;border:0;border-radius:13px;padding:11px;background:#234d2d;color:#fff;font-weight:800}.credit{font-size:11px;opacity:.7;margin:10px 0 0;line-height:1.55}.credit b{color:#dfff78}.overlay{position:fixed;inset:0;background:#000d;display:flex;align-items:center;justify-content:center;padding:18px;z-index:10}.card{width:min(92vw,380px);background:linear-gradient(180deg,#174b28,#092014);border:2px solid #bfff9f55;border-radius:22px;padding:22px;box-shadow:0 22px 80px #000}.big{font-size:40px;margin:4px}.scorebig{font-size:35px;font-weight:1000;color:#dbff55;margin:5px}.play{width:100%;border:0;border-radius:14px;padding:13px;background:linear-gradient(135deg,#b9e735,#4ac63f);color:#10210b;font-weight:1000;font-size:16px}.sync{font-size:11px;opacity:.75;margin-top:8px}.legend{font-size:11px;opacity:.8;line-height:1.5;margin:10px 0 0}
+</style>
+</head>
+<body>
+<section id="menu" class="wrap panel">
+<div class="brand">🐍 SNAKE GARDEN</div><div class="sub">GROW • EAT • SCORE HIGH</div>
+<p style="font-size:13px">Classic phone Snake, reborn in a garden.</p>
+<div class="modegrid">
+<button class="mode wall" onclick="startGame('wall')">🧱 WALLED GARDEN<small>Classic mode. Hit the stone boundary or yourself = Game Over.</small></button>
+<button class="mode open" onclick="startGame('open')">🌿 OPEN GARDEN<small>Leave one edge and return from the opposite side. Self collision still ends the run.</small></button>
+<button class="mode maze" onclick="startGame('maze')">🪨 STONE MAZE<small>Stone walls + scattered rocks. Harder route, higher score multiplier.</small></button>
+</div>
+<div class="legend">🍎 Food grows your snake • game speed rises as you eat • Maze scores ×1.5 • swipe or use the direction pad</div>
+<div class="credit">💡 Idea by <b>Shivam Raj</b><br>Created by <b>@RawHitz</b></div>
+</section>
+<section id="game" class="wrap hidden">
+<div class="brand">🐍 SNAKE GARDEN</div><div class="sub" id="modeName">WALLED GARDEN</div>
+<div class="top"><div class="stat">SCORE<strong id="score">0</strong></div><div class="stat">BEST<strong id="best">0</strong></div><div class="stat">FOOD<strong id="foodCount">0</strong></div><div class="stat">SPEED<strong id="speed">1</strong></div></div>
+<div class="gardenwrap"><div class="glow"></div><canvas id="board" width="600" height="600"></canvas></div>
+<div id="status" class="status">Swipe or use the controls. Eat the glowing fruit!</div>
+<div class="controls"><button class="ctrl up" data-dir="up">▲</button><button class="ctrl left" data-dir="left">◀</button><button class="ctrl down" data-dir="down">▼</button><button class="ctrl right" data-dir="right">▶</button></div>
+<div class="row"><button class="smallbtn" onclick="togglePause()" id="pauseBtn">⏸ PAUSE</button><button class="smallbtn" onclick="backMenu()">NEW GAME</button></div>
+<div class="credit">💡 Idea by <b>Shivam Raj</b> &nbsp;•&nbsp; Created by <b>@RawHitz</b></div>
+</section>
+<div id="over" class="overlay hidden"><div class="card"><div class="big">🐍</div><h2>GAME OVER</h2><div class="scorebig" id="finalScore">0</div><div id="finalText" style="font-size:12px;opacity:.8"></div><button class="play" onclick="restartSame()">PLAY AGAIN</button><button class="smallbtn" style="width:100%;margin-top:8px" onclick="backMenu()">CHANGE MODE</button><div id="syncText" class="sync"></div><div class="credit">💡 Idea by <b>Shivam Raj</b><br>Created by <b>@RawHitz</b></div></div></div>
+<script>
+const cvs=document.getElementById('board'),ctx=cvs.getContext('2d');
+const COLS=20,ROWS=20,CELL=30;
+const MODE_LABEL={wall:'WALLED GARDEN',open:'OPEN GARDEN',maze:'STONE MAZE'};
+const FRUITS=[{emoji:'🍎',pts:10},{emoji:'🍓',pts:12},{emoji:'🍊',pts:14},{emoji:'🍇',pts:16},{emoji:'🥝',pts:18}];
+let mode='wall',snake=[],dir={x:1,y:0},nextDir={x:1,y:0},food=null,rocks=[],score=0,eaten=0,speed=1,running=false,paused=false,timer=null,currentDelay=180;
+let launch=new URLSearchParams(location.search).get('launch')||'';
+function key(){return 'snakeGardenBest_'+mode}function best(){return Number(localStorage.getItem(key())||0)}
+function startGame(m){mode=m;document.getElementById('menu').classList.add('hidden');document.getElementById('game').classList.remove('hidden');reset();}
+function restartSame(){document.getElementById('over').classList.add('hidden');reset()}
+function backMenu(){clearTimeout(timer);running=false;document.getElementById('over').classList.add('hidden');document.getElementById('game').classList.add('hidden');document.getElementById('menu').classList.remove('hidden')}
+function reset(){clearTimeout(timer);snake=[{x:9,y:10},{x:8,y:10},{x:7,y:10},{x:6,y:10}];dir={x:1,y:0};nextDir={x:1,y:0};score=0;eaten=0;speed=1;paused=false;running=true;currentDelay=180;rocks=mode==='maze'?makeMaze():[];spawnFood();document.getElementById('modeName').textContent=MODE_LABEL[mode];document.getElementById('pauseBtn').textContent='⏸ PAUSE';updateStats();draw();setStatus(mode==='open'?'Open walls enabled — wrap around the garden!':mode==='maze'?'Maze multiplier ×1.5 — avoid every stone!':'Classic walls — touch the border and the run ends.');schedule()}
+function makeMaze(){const a=[];const sets=[[3,3],[4,3],[5,3],[14,2],[14,3],[14,4],[2,14],[3,14],[4,14],[11,12],[12,12],[13,12],[6,7],[6,8],[15,16],[16,16],[10,4],[10,5],[4,17],[5,17]];for(const [x,y] of sets)a.push({x,y});return a}
+function occupied(x,y){return snake.some(s=>s.x===x&&s.y===y)||rocks.some(r=>r.x===x&&r.y===y)}
+function spawnFood(){let x,y,guard=0;do{x=Math.floor(Math.random()*COLS);y=Math.floor(Math.random()*ROWS);guard++}while(occupied(x,y)&&guard<1000);food={x,y,...FRUITS[Math.floor(Math.random()*FRUITS.length)]}}
+function setDir(x,y){if(x===-dir.x&&y===-dir.y)return;nextDir={x,y}}
+function schedule(){clearTimeout(timer);if(running&&!paused)timer=setTimeout(step,currentDelay)}
+function step(){if(!running||paused)return;dir=nextDir;let h={x:snake[0].x+dir.x,y:snake[0].y+dir.y};if(mode==='open'){h.x=(h.x+COLS)%COLS;h.y=(h.y+ROWS)%ROWS}else if(h.x<0||h.x>=COLS||h.y<0||h.y>=ROWS){return gameOver('You hit the stone boundary.')}
+if(mode==='maze'&&rocks.some(r=>r.x===h.x&&r.y===h.y))return gameOver('You crashed into a garden stone.');
+const eating=food&&h.x===food.x&&h.y===food.y;const bodyToCheck=eating?snake:snake.slice(0,-1);if(bodyToCheck.some(s=>s.x===h.x&&s.y===h.y))return gameOver('The snake collided with itself.');
+snake.unshift(h);if(eating){eaten++;const multi=mode==='maze'?1.5:1;score+=Math.round(food.pts*multi+Math.max(0,speed-1)*2);navigator.vibrate?.(35);speed=1+Math.floor(eaten/5);currentDelay=Math.max(65,180-(speed-1)*14);spawnFood();setStatus(`${food.emoji} Yum! Snake length ${snake.length}.`)}else snake.pop();updateStats();draw();schedule()}
+function draw(){drawGrass();drawDecor();if(mode!=='open')drawStoneBorder();if(mode==='maze')rocks.forEach(drawRock);drawFood();drawSnake()}
+function drawGrass(){const g=ctx.createLinearGradient(0,0,600,600);g.addColorStop(0,'#66b94b');g.addColorStop(1,'#2e7b39');ctx.fillStyle=g;ctx.fillRect(0,0,600,600);for(let y=0;y<ROWS;y++)for(let x=0;x<COLS;x++){ctx.fillStyle=(x+y)%2?'#ffffff08':'#00000005';ctx.fillRect(x*CELL,y*CELL,CELL,CELL)}}
+function drawDecor(){ctx.font='14px serif';ctx.globalAlpha=.55;const pts=[[20,25,'🌼'],[560,30,'🌿'],[35,550,'🌸'],[540,555,'🍃'],[290,20,'🌱'],[575,300,'🌺']];pts.forEach(([x,y,e])=>ctx.fillText(e,x,y));ctx.globalAlpha=1}
+function drawStoneBorder(){ctx.fillStyle='#776b5a';for(let i=0;i<COLS;i++){stone(i,0);stone(i,ROWS-1)}for(let i=1;i<ROWS-1;i++){stone(0,i);stone(COLS-1,i)}}
+function stone(x,y){ctx.fillStyle='#756a59';ctx.fillRect(x*CELL+2,y*CELL+2,CELL-4,CELL-4);ctx.fillStyle='#9d927d';ctx.fillRect(x*CELL+5,y*CELL+5,CELL-10,7);ctx.strokeStyle='#4e4639';ctx.strokeRect(x*CELL+2,y*CELL+2,CELL-4,CELL-4)}
+function drawRock(r){ctx.save();ctx.translate(r.x*CELL+CELL/2,r.y*CELL+CELL/2);ctx.fillStyle='#716b62';ctx.beginPath();ctx.arc(0,2,12,0,Math.PI*2);ctx.fill();ctx.fillStyle='#9a948a';ctx.beginPath();ctx.arc(-3,-3,7,0,Math.PI*2);ctx.fill();ctx.restore()}
+function drawFood(){if(!food)return;const cx=food.x*CELL+CELL/2,cy=food.y*CELL+CELL/2;const pulse=3+Math.sin(Date.now()/120)*2;ctx.save();ctx.shadowColor='#fff95c';ctx.shadowBlur=14+pulse;ctx.font='22px serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(food.emoji,cx,cy);ctx.restore()}
+function drawSnake(){for(let i=snake.length-1;i>=0;i--){const s=snake[i],cx=s.x*CELL+CELL/2,cy=s.y*CELL+CELL/2;const t=i/Math.max(1,snake.length-1);ctx.save();ctx.shadowColor='#143e11';ctx.shadowBlur=4;ctx.fillStyle=i===0?'#d9ff3d':`hsl(${112-20*t} 72% ${45-12*t}%)`;ctx.beginPath();ctx.arc(cx,cy,i===0?13:11,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#174d1d';ctx.lineWidth=2;ctx.stroke();if(i===0){ctx.fillStyle='#142313';const ex=dir.x===0?5:dir.x*4,ey=dir.y===0?5:dir.y*4;ctx.beginPath();ctx.arc(cx+ex-(dir.y*4),cy+ey+(dir.x*4),2,0,Math.PI*2);ctx.arc(cx+ex+(dir.y*4),cy+ey-(dir.x*4),2,0,Math.PI*2);ctx.fill()}ctx.restore()}}
+function updateStats(){document.getElementById('score').textContent=score;document.getElementById('best').textContent=Math.max(best(),score);document.getElementById('foodCount').textContent=eaten;document.getElementById('speed').textContent=speed}
+function setStatus(t){document.getElementById('status').textContent=t}
+function togglePause(){if(!running)return;paused=!paused;document.getElementById('pauseBtn').textContent=paused?'▶ RESUME':'⏸ PAUSE';setStatus(paused?'Game paused.':'Back in the garden!');if(!paused)schedule()}
+async function gameOver(reason){running=false;clearTimeout(timer);if(score>best())localStorage.setItem(key(),score);updateStats();document.getElementById('finalScore').textContent=score;document.getElementById('finalText').textContent=`${MODE_LABEL[mode]} • ${eaten} food eaten • ${reason}`;document.getElementById('syncText').textContent=launch?'Syncing Telegram score…':'Personal best saved on this device.';document.getElementById('over').classList.remove('hidden');navigator.vibrate?.([90,50,160]);if(launch){try{const r=await fetch('https://blockrush-backend.vercel.app/api/score',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({launch,score})});const d=await r.json();document.getElementById('syncText').textContent=d.ok?'🏆 Telegram high score updated.':'Score saved locally; Telegram sync failed.'}catch(e){document.getElementById('syncText').textContent='Score saved locally; Telegram sync failed.'}}}
+document.querySelectorAll('.ctrl').forEach(b=>b.addEventListener('pointerdown',e=>{e.preventDefault();const d=b.dataset.dir;if(d==='up')setDir(0,-1);if(d==='down')setDir(0,1);if(d==='left')setDir(-1,0);if(d==='right')setDir(1,0)}));
+document.addEventListener('keydown',e=>{if(e.key==='ArrowUp')setDir(0,-1);if(e.key==='ArrowDown')setDir(0,1);if(e.key==='ArrowLeft')setDir(-1,0);if(e.key==='ArrowRight')setDir(1,0)});
+let sx=0,sy=0;cvs.addEventListener('pointerdown',e=>{sx=e.clientX;sy=e.clientY});cvs.addEventListener('pointerup',e=>{const dx=e.clientX-sx,dy=e.clientY-sy;if(Math.max(Math.abs(dx),Math.abs(dy))<18)return;if(Math.abs(dx)>Math.abs(dy))setDir(dx>0?1:-1,0);else setDir(0,dy>0?1:-1)});
+setInterval(()=>{if(running)draw()},90);
+</script>
+</body>
+</html>
