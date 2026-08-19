@@ -1,5 +1,5 @@
 <!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no"><title>LudoRush</title></head><body style="margin:0;background:#07142b;color:white;font-family:Arial;text-align:center"><p style="margin-top:40vh">Loading LudoRush…</p><script>
-fetch('../ludorush/index.html?v=dicefix-20260819-2039').then(r=>r.text()).then(html=>{
+fetch('../ludorush/index.html?v=homefix-20260819-2044').then(r=>r.text()).then(html=>{
   html=html.replace(/<div class="modegrid"><button class="mode" onclick="showColors\(\)">[\s\S]*?<\/button><button class="mode secondary" onclick="showMulti\(\)">[\s\S]*?<\/button><\/div>/,'<div class="modegrid"><button class="mode" onclick="showColors()">🤖 SINGLE PLAYER</button></div>');
   html=html.replace(/<div id="multiInfo" class="hidden">[\s\S]*?<\/div><div class="rulebox">/,'<div class="rulebox">');
   html=html.replace('.modegrid,.colors{display:grid;grid-template-columns:1fr 1fr;gap:10px}', '.modegrid,.colors{display:grid;grid-template-columns:1fr 1fr;gap:10px}.modegrid{grid-template-columns:1fr}');
@@ -7,6 +7,8 @@ fetch('../ludorush/index.html?v=dicefix-20260819-2039').then(r=>r.text()).then(h
   html=html.replace(/function showMulti\(\)[\s\S]*?function hideChoices\(\)/,'function hideChoices()');
   html=html.replace(/<div class="pill">DICE<strong id="diceText" class="dice">[\s\S]*?<\/strong><\/div><\/div><div class="boardwrap">/,'<div class="pill">DICE<strong id="diceText" class="dice" style="font-size:30px;font-weight:1000">—</strong></div><div class="pill">TIME<strong id="timeAttack">00:00</strong></div></div><div class="boardwrap">');
   html=html.replace('<p id="winnerSub" class="small"></p><button class="mode" onclick="restartToMenu()">PLAY AGAIN</button>','<p id="winnerSub" class="small"></p><div id="timeResult" class="small" style="margin:9px 0;color:#ffd65a"></div><button class="mode" onclick="restartToMenu()">PLAY AGAIN</button>');
+  /* Correct Ludo geometry: after the last outer-track square, turn into the colour home lane. */
+  html=html.replace(/p\.p===58/g,'p.p===57').replace(/p=>p\.p===58/g,'p=>p.p===57').replace(/t===58/g,'t===57').replace(/t>58/g,'t>57').replace(/t<=58/g,'t<=57').replace(/p\.p>=52/g,'p.p>=51').replace(/p\.p-52/g,'p.p-51').replace(/p<52/g,'p<51').replace(/t<52/g,'t<51').replace(/Math\.min\(to,51\)/g,'Math.min(to,50)');
   html=html.replace('</body>',`<script>
 (function(){
  const SCORE_API='https://blockrush-backend.vercel.app/api/score';
