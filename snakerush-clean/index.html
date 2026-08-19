@@ -1,0 +1,9 @@
+<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no"><title>SnakeRush</title></head><body style="margin:0;background:#061128;color:white;font-family:Arial;text-align:center"><p style="margin-top:40vh">Loading SnakeRush…</p><script>
+fetch('../snakerush/index.html?v=clean').then(r=>r.text()).then(html=>{
+  html=html.replace(/<div class="modegrid"><button class="btn solo" onclick="startSingle\(\)">[\s\S]*?<\/button><button class="btn multi" onclick="showMulti\(\)">[\s\S]*?<\/button><\/div>/,'<div class="modegrid"><button class="btn solo" onclick="startSingle()">🤖 SINGLE PLAYER</button></div>');
+  html=html.replace(/<div id="multi" class="hidden">[\s\S]*?<\/div><div class="rules">/,'<div class="rules">');
+  html=html.replace('.modegrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}', '.modegrid{display:grid;grid-template-columns:1fr;gap:10px}');
+  html=html.replace(/function showMulti\(\)[\s\S]*?function hideMulti\(\)[\s\S]*?\}/,'');
+  document.open();document.write(html);document.close();
+}).catch(()=>{document.body.innerHTML='<h2>SnakeRush failed to load</h2><p>Please reopen the game.</p>'});
+</script></body></html>
