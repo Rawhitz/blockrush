@@ -15,6 +15,10 @@ export default async function handler(req, res) {
       throw new Error('Invalid score');
     }
 
+    if (!data.chat_id && !data.inline_message_id) {
+      throw new Error('This game was not launched from a Telegram game message');
+    }
+
     const payload = {
       user_id: data.user_id,
       score: numericScore,
@@ -30,7 +34,23 @@ export default async function handler(req, res) {
     }
 
     await telegram('setGameScore', payload);
-    return res.status(200).json({ ok: true });
+
+    const highPayload = { user_id: data.user_id };
+    if (data.inline_message_id) {
+      highPayload.inline_message_id = data.inline_message_id;
+    } else {
+      highPayload.chat_id = data.chat_id;
+      highPayload.message_id = data.message_id;
+    }
+
+    let highscores = [];
+    try {
+      highscores = await telegram('getGameHighScores', highPayload);
+    } catch (e) {
+      console.error('getGameHighScores failed:', e.message);
+    }
+
+    return res.status(200).json({ ok: true, highscores });
   } catch (error) {
     console.error(error);
     return res.status(400).json({ ok: false, error: error.message });
