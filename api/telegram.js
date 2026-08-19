@@ -44,7 +44,7 @@ export default async function handler(req, res) {
       if (text === '/start' || text.startsWith('/start@')) {
         await telegram('sendMessage', {
           chat_id: chatId,
-          text: '🎮 Welcome!\n\n/blockrush — play BLOCKRUSH\n/ludo — play LUDORUSH\n/snake — play SNAKERUSH\n/games — show all games',
+          text: '🎮 Welcome!\n\n/blockrush — play BLOCKRUSH\n/ludo — play LUDORUSH\n/snake — play SNAKERUSH\n/garden — play SNAKE GARDEN\n/games — show all games',
         });
       } else if (text === '/game' || text.startsWith('/game@') || text === '/blockrush' || text.startsWith('/blockrush@')) {
         await sendGame(chatId, 'blockrushsuper');
@@ -52,10 +52,12 @@ export default async function handler(req, res) {
         await sendGame(chatId, 'ludorush');
       } else if (text === '/snake' || text.startsWith('/snake@') || text === '/snakerush' || text.startsWith('/snakerush@')) {
         await sendGame(chatId, 'snakerush');
+      } else if (text === '/garden' || text.startsWith('/garden@') || text === '/snakegarden' || text.startsWith('/snakegarden@')) {
+        await sendGame(chatId, 'snakegarden');
       } else if (text === '/games' || text.startsWith('/games@')) {
         await telegram('sendMessage', {
           chat_id: chatId,
-          text: '🎮 Choose a game:\n\n🧱 /blockrush — Stack. Smash. Survive!\n🎲 /ludo — Roll. Race. Win!\n🐍 /snake — Climb ladders. Dodge snakes. Race to 100!',
+          text: '🎮 Choose a game:\n\n🧱 /blockrush — Stack. Smash. Survive!\n🎲 /ludo — Roll. Race. Win!\n🐍 /snake — Climb ladders. Dodge snakes. Race to 100!\n🌿 /garden — Classic Snake in a living garden!',
         });
       }
     }
@@ -69,10 +71,11 @@ export default async function handler(req, res) {
 
     if (update.inline_query) {
       const q = (update.inline_query.query || '').toLowerCase();
-      let gameNames = ['blockrushsuper', 'ludorush', 'snakerush'];
+      let gameNames = ['blockrushsuper', 'ludorush', 'snakerush', 'snakegarden'];
       if (q.includes('ludo')) gameNames = ['ludorush'];
       if (q.includes('block')) gameNames = ['blockrushsuper'];
-      if (q.includes('snake')) gameNames = ['snakerush'];
+      if (q.includes('garden')) gameNames = ['snakegarden'];
+      else if (q.includes('snake')) gameNames = ['snakerush', 'snakegarden'];
 
       await telegram('answerInlineQuery', {
         inline_query_id: update.inline_query.id,
