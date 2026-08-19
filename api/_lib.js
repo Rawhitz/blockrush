@@ -8,12 +8,12 @@ export const GAMES = {
   },
   ludorush: {
     shortName: 'ludorush',
-    url: 'https://rawhitz.github.io/blockrush/ludorush/',
+    url: 'https://rawhitz.github.io/blockrush/ludorush-clean/',
     title: 'LUDORUSH',
   },
   snakerush: {
     shortName: 'snakerush',
-    url: 'https://rawhitz.github.io/blockrush/snakerush/',
+    url: 'https://rawhitz.github.io/blockrush/snakerush-clean/',
     title: 'SNAKERUSH',
   },
   snakegarden: {
