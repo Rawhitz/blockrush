@@ -1,5 +1,5 @@
 <!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no"><title>LudoRush</title></head><body style="margin:0;background:#07142b;color:white;font-family:Arial;text-align:center"><p style="margin-top:40vh">Loading LudoRush…</p><script>
-fetch('../ludorush/index.html?v=rules-v4-20260819-2352',{cache:'no-store'}).then(r=>r.text()).then(html=>{
+fetch('../ludorush/index.html?v=rules-v5-20260820-0052',{cache:'no-store'}).then(r=>r.text()).then(html=>{
   html=html.replace(/<div class="modegrid"><button class="mode" onclick="showColors\(\)">[\s\S]*?<\/button><button class="mode secondary" onclick="showMulti\(\)">[\s\S]*?<\/button><\/div>/,'');
   html=html.replace(/<div id="multiInfo" class="hidden">[\s\S]*?<\/div><div class="rulebox">/,'<div class="rulebox">');
   html=html.replace('<p>Choose how you want to play.</p>','<p><b>Choose your colour</b><br><span class="small">The bot takes the opposite colour.</span></p>');
@@ -8,19 +8,59 @@ fetch('../ludorush/index.html?v=rules-v4-20260819-2352',{cache:'no-store'}).then
   html=html.replace('.topbar{display:grid;grid-template-columns:1fr 1fr 1fr;', '.topbar{display:grid;grid-template-columns:repeat(4,1fr);');
   html=html.replace(/function showMulti\(\)[\s\S]*?function hideChoices\(\)/,'function hideChoices()');
   html=html.replace(/<div class="pill">DICE<strong id="diceText" class="dice">[\s\S]*?<\/strong><\/div><\/div><div class="boardwrap">/,'<div class="pill">DICE<strong id="diceText" class="dice" style="font-size:30px;font-weight:1000">—</strong></div><div class="pill">TIME<strong id="timeAttack">00:00</strong></div></div><div class="boardwrap">');
-  html=html.replace(/<div class="rulebox"><b>🔥 Bengali Jora Guti rules<\/b>[\s\S]*?<\/div><\/section>/,'<div class="rulebox"><b>🔥 Bengali Jora Guti rules</b><br>• Each side has 4 pawns. A captured pawn returns to its own base.<br>• After one full outer circuit, a pawn enters its own coloured home lane.<br>• An exact roll is required to reach the centre. Once HOME, that pawn is permanently finished.<br>• Two same-colour pawns meeting may stay separate or form a Jora — the player chooses.<br>• Jora moves only on even rolls: 6→3, 4→2, 2→1.<br>• A single pawn cannot kill or pass an enemy Jora; only another Jora can kill it.<br>• Jora formed on a ⭐ star may split only on a ⭐ star.<br>• Jora formed elsewhere may split anywhere.</div></section>');
+  html=html.replace(/<div class="rulebox"><b>🔥 Bengali Jora Guti rules<\/b>[\s\S]*?<\/div><\/section>/,'<div class="rulebox"><b>🔥 Bengali Jora Guti rules</b><br>• Each side has 4 pawns. A captured pawn returns to its own base.<br>• After one full outer circuit, a pawn turns directly into its own coloured home lane.<br>• An exact roll is required to reach the centre. Once HOME, that pawn is permanently finished.<br>• Two active same-colour pawns that genuinely meet may stay separate or form a Jora — the player chooses.<br>• A pawn coming out of base cannot instantly create a Jora.<br>• Jora moves only on even rolls: 6→3, 4→2, 2→1.<br>• A single pawn cannot kill or pass an enemy Jora; only another Jora can kill it.<br>• Jora formed on a ⭐ star may split only on a ⭐ star.<br>• Jora formed elsewhere may split anywhere.</div></section>');
   html=html.replace('<p id="winnerSub" class="small"></p><button class="mode" onclick="restartToMenu()">PLAY AGAIN</button>','<p id="winnerSub" class="small"></p><div id="timeResult" class="small" style="margin:9px 0;color:#ffd65a"></div><button class="mode" onclick="restartToMenu()">PLAY AGAIN</button>');
   html=html.replace('</body>',`<script>
 (function(){
+  const OUTER_LAST=50, HOME_START=51, HOME_LAST=56, FINISH=57;
   const pairMeta={};
   let greenThirdSix=false;
 
+  /* Correct board geometry: 0..50 outer track, 51..56 own lane, 57 centre. */
+  coord=function(col,p,i){
+    if(p.p===-1){const b={red:[0,0],green:[9,0],blue:[0,9],yellow:[9,9]}[col],q=[[2,2],[4,2],[2,4],[4,4]][i];return cc(b[0]+q[0],b[1]+q[1])}
+    if(p.p===FINISH)return[300+(i-1.5)*15,300];
+    if(p.p>=HOME_START&&p.p<=HOME_LAST){const xy=HOME[col][p.p-HOME_START];return cc(xy[0],xy[1])}
+    const abs=(OFF[col]+p.p)%52,xy=ROUTE[abs];return cc(xy[0],xy[1]);
+  };
+  absPos=function(col,p){return p>=0&&p<=OUTER_LAST?(OFF[col]+p)%52:null};
+  onStar=function(col,p){const a=absPos(col,p);return a!==null&&JORA_STARS.has(a)};
+
+  blockedByEnemyPair=function(col,from,to){
+    if(from<0||from>OUTER_LAST)return false;
+    const en=enemy(col),last=Math.min(to,OUTER_LAST);
+    for(let s=from+1;s<=last;s++){const a=(OFF[col]+s)%52;if(pawns[en].some(p=>p.pair!==null&&absPos(en,p.p)===a))return true}
+    return false;
+  };
+  legalSingle=function(col,i,roll){
+    const p=pawns[col][i];
+    if(p.pair!==null||p.p===FINISH)return false;
+    if(p.p===-1)return roll===6;
+    const t=p.p+roll;
+    if(t>FINISH||blockedByEnemyPair(col,p.p,t))return false;
+    if(t<=OUTER_LAST){const a=(OFF[col]+t)%52,en=enemy(col);if(pawns[en].some(q=>q.pair!==null&&absPos(en,q.p)===a))return false}
+    return true;
+  };
+  legalPair=function(col,id,roll){
+    if(roll%2)return false;
+    const m=pairMembers(col,id);if(m.length!==2)return false;
+    const p=pawns[col][m[0]],t=p.p+roll/2;
+    return t<=FINISH&&!blockedByEnemyPair(col,p.p,t);
+  };
+  legalSingleAfterSplit=function(col,i,roll){const p=pawns[col][i],old=p.pair;p.pair=null;const ok=legalSingle(col,i,roll);p.pair=old;return ok};
+
   function destination(col,i,roll){const p=pawns[col][i];return p.p===-1?0:p.p+roll}
-  function joinBuddy(col,i,dest){if(dest<0||dest>=52)return -1;const a=(OFF[col]+dest)%52;return pawns[col].findIndex((q,j)=>j!==i&&q.pair===null&&q.p>=0&&q.p<52&&absPos(col,q.p)===a)}
+  function joinBuddy(col,i,dest){
+    const mover=pawns[col][i];
+    /* Exiting base is never a Jora-formation event. */
+    if(mover.p<0||dest<0||dest>OUTER_LAST)return -1;
+    const a=(OFF[col]+dest)%52;
+    return pawns[col].findIndex((q,j)=>j!==i&&q.pair===null&&q.p>=0&&q.p<=OUTER_LAST&&absPos(col,q.p)===a);
+  }
   function canSplitHere(col,id){const m=pairMembers(col,id);if(m.length!==2)return false;const meta=pairMeta[id];if(!meta||!meta.starLocked)return true;return onStar(col,pawns[col][m[0]].p)}
 
+  /* Never auto-form Jora. */
   formJora=function(){};
-
   makeActions=function(col,roll){
     const out=[];
     for(let i=0;i<4;i++){
@@ -30,28 +70,54 @@ fetch('../ludorush/index.html?v=rules-v4-20260819-2352',{cache:'no-store'}).then
       if(buddy>=0)out.push({type:'singleJoin',i,buddy,label:'🤝 FORM JORA '+(i+1)+'+'+(buddy+1),jora:true});
     }
     const ids=[...new Set(pawns[col].map(p=>p.pair).filter(x=>x!==null))];
-    for(const id of ids){const m=pairMembers(col,id);if(m.length!==2)continue;if(legalPair(col,id,roll))out.push({type:'pair',id,label:'Jora '+m.map(x=>x+1).join('+')+' • '+(roll/2)+' step',jora:true});if(canSplitHere(col,id))for(const i of m)if(legalSingleAfterSplit(col,i,roll))out.push({type:'split',id,i,label:'✂️ Split → Pawn '+(i+1),split:true})}
+    for(const id of ids){
+      const m=pairMembers(col,id);if(m.length!==2)continue;
+      if(legalPair(col,id,roll))out.push({type:'pair',id,label:'Jora '+m.map(x=>x+1).join('+')+' • '+(roll/2)+' step',jora:true});
+      if(canSplitHere(col,id))for(const i of m)if(legalSingleAfterSplit(col,i,roll))out.push({type:'split',id,i,label:'✂️ Split → Pawn '+(i+1),split:true});
+    }
     return out;
   };
 
   capture=function(col,moved,isPair){
-    const p=pawns[col][moved[0]];if(p.p<0||p.p>=52)return false;const a=absPos(col,p.p);if(SAFE.has(a))return false;const en=enemy(col);
-    const enemyPairIds=[...new Set(pawns[en].filter(q=>q.pair!==null&&absPos(en,q.p)===a).map(q=>q.pair))];
-    if(enemyPairIds.length){if(!isPair)return false;const id=enemyPairIds[0];for(const i of pairMembers(en,id)){pawns[en][i].p=-1;pawns[en][i].pair=null}delete pairMeta[id];toast('💥 Jora captured Jora — both pawns returned to base!');return true}
-    let cap=false;for(const q of pawns[en])if(q.pair===null&&absPos(en,q.p)===a){q.p=-1;q.pair=null;cap=true}if(cap)toast('💥 Captured pawn returned to base!');return cap;
+    const p=pawns[col][moved[0]];if(p.p<0||p.p>OUTER_LAST)return false;
+    const a=absPos(col,p.p);if(SAFE.has(a))return false;
+    const en=enemy(col),enemyPairIds=[...new Set(pawns[en].filter(q=>q.pair!==null&&absPos(en,q.p)===a).map(q=>q.pair))];
+    if(enemyPairIds.length){
+      if(!isPair)return false;
+      const id=enemyPairIds[0];for(const i of pairMembers(en,id)){pawns[en][i].p=-1;pawns[en][i].pair=null}delete pairMeta[id];toast('💥 Jora captured Jora — both pawns returned to base!');return true;
+    }
+    let cap=false;for(const q of pawns[en])if(q.pair===null&&absPos(en,q.p)===a){q.p=-1;q.pair=null;cap=true}
+    if(cap)toast('💥 Captured pawn returned to base!');return cap;
   };
 
   applyAction=function(col,a,roll){
     awaiting=false;let moved=[],isPair=false;
     if(a.type==='split'){const members=pairMembers(col,a.id);for(const i of members)pawns[col][i].pair=null;delete pairMeta[a.id];toast('✂️ Jora split');a={type:'single',i:a.i}}
     if(a.type==='single'||a.type==='singleJoin'){
-      const p=pawns[col][a.i];if(p.p===-1){p.p=0;attempts[col]=0}else p.p+=roll;moved=[a.i];
-      if(a.type==='singleJoin'){const buddy=pawns[col][a.buddy];if(p.p>=0&&p.p<52&&buddy&&buddy.pair===null&&absPos(col,buddy.p)===absPos(col,p.p)){const id=pairSeq++;p.pair=id;buddy.pair=id;pairMeta[id]={starLocked:onStar(col,p.p)};toast(pairMeta[id].starLocked?'⭐ Star Jora formed — split only on a star':'🤝 Jora formed — may split anywhere');moved=[a.i,a.buddy];isPair=true}}
-    }else if(a.type==='pair'){const m=pairMembers(col,a.id),steps=roll/2;for(const i of m)pawns[col][i].p+=steps;moved=m;isPair=true}
-    const cap=capture(col,moved,isPair);draw();if(pawns[col].every(p=>p.p===58)){endGame(col);return}setTimeout(()=>finish(roll===6||cap),420);
+      const p=pawns[col][a.i],wasBase=p.p===-1;
+      if(wasBase){p.p=0;attempts[col]=0}else p.p+=roll;
+      moved=[a.i];
+      if(a.type==='singleJoin'&&!wasBase){
+        const buddy=pawns[col][a.buddy];
+        if(p.p>=0&&p.p<=OUTER_LAST&&buddy&&buddy.pair===null&&buddy.p>=0&&buddy.p<=OUTER_LAST&&absPos(col,buddy.p)===absPos(col,p.p)){
+          const id=pairSeq++;p.pair=id;buddy.pair=id;pairMeta[id]={starLocked:onStar(col,p.p)};
+          toast(pairMeta[id].starLocked?'⭐ Star Jora formed — split only on a star':'🤝 Jora formed — may split anywhere');moved=[a.i,a.buddy];isPair=true;
+        }
+      }
+    }else if(a.type==='pair'){
+      const m=pairMembers(col,a.id),steps=roll/2;for(const i of m)pawns[col][i].p+=steps;moved=m;isPair=true;
+      if(m.every(i=>pawns[col][i].p===FINISH)){for(const i of m)pawns[col][i].pair=null;delete pairMeta[a.id]}
+    }
+    const cap=capture(col,moved,isPair);draw();
+    if(pawns[col].every(p=>p.p===FINISH)){endGame(col);return}
+    setTimeout(()=>finish(roll===6||cap),420);
   };
 
-  scoreAction=function(col,a,roll){let idx=a.i;if(idx==null&&a.id!=null)idx=pairMembers(col,a.id)[0];const p=pawns[col][idx],steps=a.type==='pair'?roll/2:roll,t=p.p===-1?0:p.p+steps;let s=t;if(t===58)s+=1500;else if(t>=52)s+=450;if(p.p===-1)s+=180;if(a.type==='singleJoin')s+=120;if(a.type==='pair')s+=80;return s};
+  scoreAction=function(col,a,roll){
+    let idx=a.i;if(idx==null&&a.id!=null)idx=pairMembers(col,a.id)[0];
+    const p=pawns[col][idx],steps=a.type==='pair'?roll/2:roll,t=p.p===-1?0:p.p+steps;let s=t;
+    if(t===FINISH)s+=1500;else if(t>=HOME_START)s+=450;if(p.p===-1)s+=180;if(a.type==='singleJoin')s+=120;if(a.type==='pair')s+=80;return s;
+  };
 
   /* Dev-only single-player easter egg. Never used by multiplayer. */
   const normalRollFor=rollFor;
@@ -66,15 +132,13 @@ fetch('../ludorush/index.html?v=rules-v4-20260819-2352',{cache:'no-store'}).then
       return 1+Math.floor(Math.random()*6);
     }
     if(col==='green'&&greenThirdSix){
-      const exact=pawns[col].find(p=>p.p>=52&&p.p<58&&58-p.p>=1&&58-p.p<=6);
-      if(exact&&Math.random()<0.72)return 58-exact.p;
-      const r=Math.random();if(r<0.48)return 6;if(r<0.62)return 5;if(r<0.74)return 4;
-      return 1+Math.floor(Math.random()*6);
+      const exact=pawns[col].find(p=>p.p>=HOME_START&&p.p<FINISH&&FINISH-p.p>=1&&FINISH-p.p<=6);
+      if(exact&&Math.random()<0.72)return FINISH-exact.p;
+      const r=Math.random();if(r<0.48)return 6;if(r<0.62)return 5;if(r<0.74)return 4;return 1+Math.floor(Math.random()*6);
     }
     if(col==='blue'){
-      let r=normalRollFor(col);
-      const unfinished=pawns[col].filter(p=>p.p!==58);
-      if(unfinished.length===1){const p=unfinished[0],need=p.p>=0?58-p.p:-1;if(need>=1&&need<=6&&r===need){const choices=[1,2,3,4,5,6].filter(x=>x!==need);r=choices[Math.floor(Math.random()*choices.length)]}}
+      let r=normalRollFor(col);const unfinished=pawns[col].filter(p=>p.p!==FINISH);
+      if(unfinished.length===1){const p=unfinished[0],need=p.p>=0?FINISH-p.p:-1;if(need>=1&&need<=6&&r===need){const choices=[1,2,3,4,5,6].filter(x=>x!==need);r=choices[Math.floor(Math.random()*choices.length)]}}
       return r;
     }
     return normalRollFor(col);
@@ -92,7 +156,7 @@ fetch('../ludorush/index.html?v=rules-v4-20260819-2352',{cache:'no-store'}).then
   showDice=function(){const e=document.getElementById('diceText');if(!e)return;if(typeof dice==='number'&&dice>=1&&dice<=6){e.textContent=dice+' '+faces[dice-1];e.style.color='#ffd84a';e.style.textShadow='0 0 18px #ffd84aaa'}else{e.textContent='—';e.style.color='#fff';e.style.textShadow='none'}};
   const oldStart=startSingle;startSingle=function(c){greenThirdSix=false;Object.keys(pairMeta).forEach(k=>delete pairMeta[k]);const r=oldStart(c);showDice();startClock();return r};
   const oldEnd=endGame;endGame=function(col){const ms=stopClock();const won=col===human;const r=oldEnd(col);const sub=document.getElementById('winnerSub');if(sub)sub.innerHTML+=(sub.innerHTML?'<br>':'')+'⏱ Finish time: '+fmt(ms);const box=document.getElementById('timeResult');if(won)submit(ms);else if(box)box.textContent='Only winning finishes enter the Time Attack leaderboard.';return r};
-  const oldRestart=restartToMenu;restartToMenu=function(){stopClock();return oldRestart()};
+  const baseRestart=restartToMenu;restartToMenu=function(){stopClock();const r=baseRestart();setTimeout(()=>{if(window.colorPick)colorPick.classList.remove('hidden')},0);return r};
 })();
 <\/script></body>`);
   document.open();document.write(html);document.close();
