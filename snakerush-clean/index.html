@@ -1,10 +1,11 @@
 <!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no"><title>SnakeRush</title></head><body style="margin:0;background:#061128;color:white;font-family:Arial;text-align:center"><p style="margin-top:40vh">Loading SnakeRush…</p><script>
-fetch('../snakerush/index.html?v=timeattack').then(r=>r.text()).then(html=>{
+fetch('../snakerush/index.html?v=timeattack-fix1').then(r=>r.text()).then(html=>{
   html=html.replace(/<div class="modegrid"><button class="btn solo" onclick="startSingle\(\)">[\s\S]*?<\/button><button class="btn multi" onclick="showMulti\(\)">[\s\S]*?<\/button><\/div>/,'<div class="modegrid"><button class="btn solo" onclick="startSingle()">🤖 SINGLE PLAYER</button></div>');
   html=html.replace(/<div id="multi" class="hidden">[\s\S]*?<\/div><div class="rules">/,'<div class="rules">');
   html=html.replace('.modegrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}', '.modegrid{display:grid;grid-template-columns:1fr;gap:10px}');
   html=html.replace('.top{display:grid;grid-template-columns:1fr 1fr 1fr;', '.top{display:grid;grid-template-columns:repeat(4,1fr);');
   html=html.replace(/function showMulti\(\)[\s\S]*?function hideMulti\(\)[\s\S]*?\}/,'');
+  html=html.replace('await animateMove(who,pos[who],pos[who]+r);pos[who]+=r;', 'await animateMove(who,pos[who],pos[who]+r);');
   html=html.replace('<div class="pill">DICE<strong id="diceText" class="dice dicebox">⚀</strong></div></div><div class="boardwrap">','<div class="pill">DICE<strong id="diceText" class="dice dicebox">⚀</strong></div><div class="pill">TIME<strong id="timeAttack">00:00</strong></div></div><div class="boardwrap">');
   html=html.replace('<p id="winText"></p><button class="btn solo" onclick="startSingle()">PLAY AGAIN</button>','<p id="winText"></p><div id="timeResult" style="font-size:12px;color:#ffe15a;margin:8px 0"></div><button class="btn solo" onclick="startSingle()">PLAY AGAIN</button>');
   html=html.replace('</body>',`<script>
