@@ -28,7 +28,7 @@ export const GAMES = {
   },
   spacerush: {
     shortName: 'spacerush',
-    url: 'https://rawhitz.github.io/blockrush/spacerush/',
+    url: 'https://rawhitz.github.io/blockrush/spacerush/play.html',
     title: 'SPACE RUSH',
   },
 };
