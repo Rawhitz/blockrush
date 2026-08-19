@@ -1,0 +1,25 @@
+<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no"><title>SPACE RUSH</title><style>html,body{margin:0;min-height:100%;background:#050313;overflow:hidden}iframe{width:100%;height:100vh;border:0;display:block;background:#050313}</style></head><body><iframe id="g" title="Space Rush"></iframe><script>
+const f=document.getElementById('g');
+f.src='./index.html'+location.search;
+f.addEventListener('load',()=>{try{const d=f.contentDocument,w=f.contentWindow;
+const st=d.createElement('style');st.textContent=`.dpad{display:none!important}.controls{grid-template-columns:1fr 1fr!important;gap:10px!important}.fire,.special{min-height:68px!important}.tips{line-height:1.55}.gameShell canvas{touch-action:none!important}`;d.head.appendChild(st);
+const tips=d.querySelector('.tips');if(tips)tips.innerHTML='<b>HOW TO PLAY</b><br>• Touch or drag anywhere on the battlefield to move your ship.<br>• Hold <b>FIRE</b> for rapid shots.<br>• Destroy enemies, dodge asteroids and collect glowing power-ups.<br>• Charge <b>NOVA</b> by fighting, then unleash it when the meter is full.<br>• Boss battles appear as the Rush gets harder.';
+w.spawnBoss=function(){
+  const hp=35+w.wave*9;
+  w.boss={x:w.W*.78,y:w.H*.5,r:48,hp:hp,max:hp,t:0,shoot:.8};
+  w.flash('⚠️ BOSS INCOMING',1300);
+  w.beep(120,.5,'sawtooth',.06,80);
+  w.status.textContent='👾 BOSS BATTLE — destroy it to resume the Rush!';
+};
+// Failsafe: if Endless reaches the boss threshold, force a visible boss.
+let lastKills=-1;
+setInterval(()=>{try{
+  if(w.running&&w.mode==='endless'){
+    if(!w.boss&&w.kills>=w.bossNext){w.spawnBoss();}
+    if(w.boss&&w.boss.x>w.W*.82)w.boss.x=w.W*.78;
+    if(!w.boss&&w.enemies.length===0&&w.kills===lastKills){w.spawnT=0;}
+    lastKills=w.kills;
+  }
+}catch(e){}},500);
+}catch(e){console.error('SpaceRush launcher patch failed',e)}});
+</script></body></html>
