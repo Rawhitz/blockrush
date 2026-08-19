@@ -21,6 +21,11 @@ export const GAMES = {
     url: 'https://rawhitz.github.io/blockrush/snakegarden/',
     title: 'SNAKE GARDEN',
   },
+  cricketrush: {
+    shortName: 'cricketrush',
+    url: 'https://rawhitz.github.io/blockrush/cricketrush/',
+    title: 'CRICKETRUSH 3D',
+  },
 };
 
 export const GAME_SHORT_NAME = GAMES.blockrushsuper.shortName;
