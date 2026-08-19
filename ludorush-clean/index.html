@@ -1,9 +1,27 @@
 <!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no"><title>LudoRush</title></head><body style="margin:0;background:#07142b;color:white;font-family:Arial;text-align:center"><p style="margin-top:40vh">Loading LudoRush…</p><script>
-fetch('../ludorush/index.html?v=clean').then(r=>r.text()).then(html=>{
+fetch('../ludorush/index.html?v=timeattack').then(r=>r.text()).then(html=>{
   html=html.replace(/<div class="modegrid"><button class="mode" onclick="showColors\(\)">[\s\S]*?<\/button><button class="mode secondary" onclick="showMulti\(\)">[\s\S]*?<\/button><\/div>/,'<div class="modegrid"><button class="mode" onclick="showColors()">🤖 SINGLE PLAYER</button></div>');
   html=html.replace(/<div id="multiInfo" class="hidden">[\s\S]*?<\/div><div class="rulebox">/,'<div class="rulebox">');
   html=html.replace('.modegrid,.colors{display:grid;grid-template-columns:1fr 1fr;gap:10px}', '.modegrid,.colors{display:grid;grid-template-columns:1fr 1fr;gap:10px}.modegrid{grid-template-columns:1fr}');
+  html=html.replace('.topbar{display:grid;grid-template-columns:1fr 1fr 1fr;', '.topbar{display:grid;grid-template-columns:repeat(4,1fr);');
   html=html.replace(/function showMulti\(\)[\s\S]*?function hideChoices\(\)/,'function hideChoices()');
+  html=html.replace('<div class="pill">DICE<strong id="diceText" class="dice">⚀</strong></div></div><div class="boardwrap">','<div class="pill">DICE<strong id="diceText" class="dice">⚀</strong></div><div class="pill">TIME<strong id="timeAttack">00:00</strong></div></div><div class="boardwrap">');
+  html=html.replace('<p id="winnerSub" class="small"></p><button class="mode" onclick="restartToMenu()">PLAY AGAIN</button>','<p id="winnerSub" class="small"></p><div id="timeResult" class="small" style="margin:9px 0;color:#ffd65a"></div><button class="mode" onclick="restartToMenu()">PLAY AGAIN</button>');
+  html=html.replace('</body>',`<script>
+(function(){
+ const SCORE_API='https://blockrush-backend.vercel.app/api/score';
+ const launch=new URLSearchParams(location.search).get('launch')||'';
+ let startedAt=0,timerId=null,elapsedMs=0;
+ function fmt(ms){const total=Math.floor(ms/1000),m=Math.floor(total/60),s=total%60;return String(m).padStart(2,'0')+':'+String(s).padStart(2,'0')}
+ function paint(){const e=document.getElementById('timeAttack');if(e)e.textContent=fmt(startedAt?performance.now()-startedAt:elapsedMs)}
+ function startClock(){clearInterval(timerId);elapsedMs=0;startedAt=performance.now();paint();timerId=setInterval(paint,250)}
+ function stopClock(){if(startedAt)elapsedMs=performance.now()-startedAt;startedAt=0;clearInterval(timerId);timerId=null;paint();return elapsedMs}
+ async function submit(ms){const box=document.getElementById('timeResult');if(!launch){if(box)box.textContent='⏱ '+fmt(ms)+' • Open from Telegram to enter Time Attack rankings.';return}const timeScore=Math.max(1,1000000-Math.floor(ms/100));if(box)box.textContent='⏱ '+fmt(ms)+' • Saving Time Attack score…';try{const r=await fetch(SCORE_API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({launch,score:timeScore})});const j=await r.json();if(!r.ok||!j.ok)throw new Error(j.error||'Score sync failed');if(box)box.textContent='🏆 '+fmt(ms)+' • Time Score '+timeScore.toLocaleString()+' • Telegram ranking updated';}catch(e){if(box)box.textContent='⏱ '+fmt(ms)+' • Telegram ranking sync failed this time.'}}
+ const oldStart=window.startSingle;window.startSingle=function(c){const r=oldStart(c);startClock();return r};
+ const oldEnd=window.endGame;window.endGame=function(col){const ms=stopClock();const won=col===window.human||col===human;const r=oldEnd(col);const sub=document.getElementById('winnerSub');if(sub)sub.innerHTML+=(sub.innerHTML?'<br>':'')+'⏱ Finish time: '+fmt(ms);const box=document.getElementById('timeResult');if(won)submit(ms);else if(box)box.textContent='Only winning finishes enter the Time Attack leaderboard.';return r};
+ const oldRestart=window.restartToMenu;window.restartToMenu=function(){stopClock();return oldRestart()};
+})();
+<\/script></body>`);
   document.open();document.write(html);document.close();
 }).catch(()=>{document.body.innerHTML='<h2>LudoRush failed to load</h2><p>Please reopen the game.</p>'});
 </script></body></html>
