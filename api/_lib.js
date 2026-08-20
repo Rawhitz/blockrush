@@ -31,6 +31,11 @@ export const GAMES = {
     url: 'https://rawhitz.github.io/blockrush/spacerush/play.html',
     title: 'SPACE RUSH',
   },
+  castlerush: {
+    shortName: 'castlerush',
+    url: 'https://rawhitz.github.io/blockrush/castlerush/',
+    title: 'CASTLERUSH',
+  },
 };
 
 export const GAME_SHORT_NAME = GAMES.blockrushsuper.shortName;
