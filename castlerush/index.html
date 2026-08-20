@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no,viewport-fit=cover">
+<title>CastleRush</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{margin:0;min-height:100%;background:#09071c;color:#fff;font-family:Arial,sans-serif;overflow-x:hidden}body{background:radial-gradient(circle at 50% -15%,#6732a8 0,#19104b 33%,#09071c 72%);padding:8px 8px 24px;text-align:center}.brand{width:min(96vw,620px);margin:2px auto 8px;padding:10px;border:1px solid #ffffff20;border-radius:19px;background:linear-gradient(90deg,#251145dd,#0c3560dd,#3b162ddd);box-shadow:0 12px 45px #0009}.logo{font-size:31px;font-weight:1000;letter-spacing:.5px;background:linear-gradient(90deg,#ffdd55,#ff8b24,#ff4d58,#bd6cff);-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:0 0 24px #ff873744}.tag{font-size:10px;letter-spacing:4px;opacity:.8;margin-top:2px}.hud{width:min(96vw,620px);display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:0 auto 8px}.pill{padding:7px 3px;border:1px solid #ffffff22;border-radius:14px;background:linear-gradient(180deg,#142a50,#091329);font-size:9px}.pill b{display:block;font-size:16px;margin-top:2px;color:#ffd85b}.arena{position:relative;width:min(96vw,620px);margin:auto}.glow{position:absolute;inset:-4px;border-radius:24px;background:linear-gradient(120deg,#ff9f24,#ff365f,#8b5cff,#2bd9ff,#ff9f24);background-size:300%;filter:blur(8px);opacity:.75;z-index:-1;animation:g 5s linear infinite}@keyframes g{to{background-position:300% 0}}canvas{display:block;width:100%;height:auto;border-radius:20px;border:2px solid #ffffffd9;background:#122350;box-shadow:0 20px 55px #000c;touch-action:none}.message{width:min(96vw,620px);margin:8px auto;padding:9px;border:1px solid #ffffff1e;border-radius:13px;background:#09162bd9;min-height:38px;font-size:12px;display:flex;align-items:center;justify-content:center}.power{width:min(96vw,620px);height:8px;margin:0 auto 8px;background:#13233e;border-radius:999px;overflow:hidden;border:1px solid #ffffff1c}.power i{display:block;height:100%;width:50%;background:linear-gradient(90deg,#39e4ff,#9d62ff,#ff4f9b,#ffce45);transition:.08s}.controls{width:min(96vw,620px);display:grid;grid-template-columns:1.5fr 1fr;gap:8px;margin:auto}.btn{border:0;border-radius:16px;padding:15px 8px;font-weight:1000;font-size:16px;color:#fff;box-shadow:0 6px 0 #0007}.launch{background:linear-gradient(135deg,#ffd33e,#ff7115);color:#261300}.nova{background:linear-gradient(135deg,#a343f0,#ec42a6)}.subcontrols{width:min(96vw,620px);display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:9px auto}.smallbtn{border:0;border-radius:14px;padding:11px;background:#1b3768;color:#fff;font-weight:900}.credit{font-size:11px;opacity:.6;margin-top:10px}.credit strong{color:#ffd65b}.overlay{position:fixed;inset:0;background:#050510e9;display:flex;align-items:center;justify-content:center;padding:18px;z-index:20}.hidden{display:none!important}.card{width:min(92vw,420px);border-radius:25px;padding:22px;background:linear-gradient(180deg,#253f7d,#100e31);border:2px solid #ffffff2b;box-shadow:0 30px 100px #000}.card h1{margin:4px 0;font-size:38px}.card p{line-height:1.5;font-size:13px;opacity:.84}.mode{width:100%;padding:15px;border:0;border-radius:16px;margin-top:10px;color:#fff;font-size:15px;font-weight:1000;background:linear-gradient(135deg,#ffb329,#ff5e19)}.mode.alt{background:linear-gradient(135deg,#245da1,#7739c6)}.rules{margin:14px 0 0;text-align:left;padding:12px;border-radius:15px;border:1px solid #ffffff1d;background:#ffffff09;font-size:11px;line-height:1.55}.badge{font-size:48px}.result{font-size:16px;color:#ffd65b;font-weight:900}.flash{position:fixed;inset:0;pointer-events:none;background:#fff;opacity:0;z-index:15}.flash.go{animation:flash .28s}@keyframes flash{0%{opacity:.8}100%{opacity:0}}
+</style>
+</head>
+<body>
+<div class="brand"><div class="logo">🏰 CASTLERUSH</div><div class="tag">FIRE • MULTIPLY • DESTROY</div></div>
+<div class="hud"><div class="pill">SCORE<b id="score">0</b></div><div class="pill">BEST<b id="best">0</b></div><div class="pill">LEVEL<b id="level">1</b></div><div class="pill">ROCKETS<b id="count">3</b></div></div>
+<div class="arena"><div class="glow"></div><canvas id="game" width="600" height="760"></canvas></div>
+<div id="message" class="message">Drag inside the battlefield to aim, then LAUNCH.</div>
+<div class="power"><i id="charge"></i></div>
+<div class="controls"><button id="launchBtn" class="btn launch">🚀 LAUNCH</button><button id="novaBtn" class="btn nova">💥 SIEGE BLAST ×1</button></div>
+<div class="subcontrols"><button id="pauseBtn" class="smallbtn">⏸ PAUSE</button><button id="quitBtn" class="smallbtn">✕ QUIT</button></div>
+<div class="credit">Created by <strong>@RawHitz</strong></div>
+<div id="start" class="overlay"><div class="card"><div class="badge">🏰🚀</div><h1>CASTLERUSH</h1><p>Guide your rocket swarm through multiplier gates, dodge stone traps and crush the enemy fortress.</p><button id="campaign" class="mode">⚔️ START CAMPAIGN</button><button id="endless" class="mode alt">♾️ ENDLESS SIEGE</button><div class="rules"><b>HOW TO PLAY</b><br>• Drag in the battlefield to aim your launcher.<br>• Fire rockets through glowing × gates to multiply the swarm.<br>• Stone walls destroy rockets on contact.<br>• Every surviving rocket damages the enemy fortress.<br>• Siege Blast clears obstacles once charged.<br>• Campaign gets harder every level. Endless continues until your castle falls.</div></div></div>
+<div id="over" class="overlay hidden"><div class="card"><div id="overIcon" class="badge">🏆</div><h1 id="overTitle">VICTORY!</h1><p id="overText"></p><div id="result" class="result"></div><button id="again" class="mode">🚀 PLAY AGAIN</button><button id="home" class="mode alt">⌂ GAME MENU</button></div></div>
+<div id="flash" class="flash"></div>
+<script>
+const cvs=document.getElementById('game'),ctx=cvs.getContext('2d');
+const W=cvs.width,H=cvs.height; const $=id=>document.getElementById(id);
+const SCORE_API='https://blockrush-backend.vercel.app/api/score';
+const launchToken=new URLSearchParams(location.search).get('launch')||'';
+let mode='campaign',running=false,paused=false,level=1,score=0,best=Number(localStorage.castleRushBest||0),aimX=W/2,rockets=[],particles=[],gates=[],walls=[],enemyShots=[],frame=0,last=0,castleHP=100,enemyHP=100,nova=0,volleyActive=false,shake=0,stars=[];
+$('best').textContent=best;
+for(let i=0;i<70;i++)stars.push({x:Math.random()*W,y:Math.random()*H,s:.5+Math.random()*1.7,a:.2+Math.random()*.7});
+const audio={ctx:null,ensure(){if(!this.ctx)this.ctx=new(window.AudioContext||window.webkitAudioContext)()},tone(f,d=.08,type='sine',v=.04){try{this.ensure();const o=this.ctx.createOscillator(),g=this.ctx.createGain();o.type=type;o.frequency.value=f;g.gain.value=v;o.connect(g);g.connect(this.ctx.destination);o.start();g.gain.exponentialRampToValueAtTime(.001,this.ctx.currentTime+d);o.stop(this.ctx.currentTime+d)}catch(e){}},boom(){this.tone(80,.3,'sawtooth',.09);setTimeout(()=>this.tone(45,.25,'square',.04),40)},shot(){this.tone(240,.08,'sawtooth',.035)},gate(){this.tone(680,.08,'square',.03);setTimeout(()=>this.tone(920,.08,'square',.025),50)}};
+function clamp(v,a,b){return Math.max(a,Math.min(b,v))} function rnd(a,b){return a+Math.random()*(b-a)}
+function syncHud(){ $('score').textContent=Math.floor(score);$('best').textContent=Math.floor(best);$('level').textContent=level;$('count').textContent=Math.max(0,rockets.length);$('novaBtn').textContent=`💥 SIEGE BLAST ×${nova}`;$('charge').style.width=Math.min(100,(score%1500)/15)+'%'}
+function setMsg(t){$('message').textContent=t}
+function resetStage(){rockets=[];particles=[];enemyShots=[];volleyActive=false;frame=0;aimX=W/2;castleHP=100;enemyHP=100+level*32;gates=[];walls=[];nova=Math.max(nova,0);buildStage();syncHud();setMsg(`Level ${level}: aim through the best multiplier path.`)}
+function buildStage(){
+ const mults=level<3?[2,3,5]:level<6?[2,3,5,10]:[2,5,10,20];
+ const ys=[520,405,292];
+ ys.forEach((y,i)=>{const m=mults[Math.floor(Math.random()*mults.length)];const width=rnd(105,145),x=rnd(65,W-width-65);gates.push({x,y,w:width,h:34,m,used:new Set(),phase:rnd(0,6.28),speed:rnd(.25,.65)});});
+ const n=Math.min(2+Math.floor(level/2),6);for(let i=0;i<n;i++){let y=rnd(225,540),w=rnd(70,155),x=rnd(20,W-w-20);walls.push({x,y,w,h:rnd(26,42),hp:1+Math.floor(level/4)});}
+}
+function spawnRocket(x,y,vx,vy,power=1){if(rockets.length>180)return;rockets.push({id:Math.random().toString(36).slice(2),x,y,vx,vy,r:4.5,power,life:0,trail:[]})}
+function fireVolley(){if(!running||paused||volleyActive)return;audio.shot();volleyActive=true;const baseX=W/2,baseY=H-88,dx=(aimX-baseX)/170;for(let i=0;i<3;i++)spawnRocket(baseX+i*7-7,baseY,dx+rnd(-.025,.025),-5.8+rnd(-.15,.15));setMsg('Volley launched — guide the swarm through the gates!')}
+function multiplyRocket(r,g){if(g.used.has(r.id))return;g.used.add(r.id);const extra=Math.min(g.m-1,9);for(let i=0;i<extra;i++)spawnRocket(r.x+rnd(-5,5),r.y,r.vx+rnd(-.35,.35),r.vy+rnd(-.2,.12),r.power);score+=g.m*3;audio.gate();burst(r.x,r.y,'#ffe155',10)}
+function burst(x,y,col='#ff9a38',n=16){for(let i=0;i<n;i++)particles.push({x,y,vx:rnd(-3,3),vy:rnd(-3,3),life:rnd(20,45),max:45,col,s:rnd(2,5)})}
+function stageWin(){volleyActive=false;score+=500+level*160;best=Math.max(best,score);localStorage.castleRushBest=Math.floor(best);nova++;flash();audio.boom();setMsg('🏰 Fortress destroyed!');if(mode==='campaign'&&level>=8){finishGame(true);return}level++;setTimeout(resetStage,900)}
+async function submitScore(){if(!launchToken)return;try{await fetch(SCORE_API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({launch:launchToken,score:Math.floor(best)})})}catch(e){}}
+function finishGame(win=false){running=false;best=Math.max(best,score);localStorage.castleRushBest=Math.floor(best);submitScore();$('overIcon').textContent=win?'👑':'🏰';$('overTitle').textContent=win?'KINGDOM CONQUERED!':'SIEGE ENDED';$('overText').textContent=win?`You cleared all 8 campaign fortresses.`:`Your final assault ended at level ${level}.`;$('result').textContent=`Score ${Math.floor(score)} • Best ${Math.floor(best)}`;$('over').classList.remove('hidden');syncHud()}
+function flash(){const f=$('flash');f.classList.remove('go');void f.offsetWidth;f.classList.add('go')}
+function siegeBlast(){if(!running||paused||nova<=0)return;nova--;audio.boom();flash();shake=15;walls.forEach(w=>burst(w.x+w.w/2,w.y+w.h/2,'#ffcf6c',26));walls=[];enemyShots=[];score+=120;syncHud();setMsg('💥 SIEGE BLAST! The path is clear.')}
+function update(dt){if(!running||paused)return;frame+=dt;
+ gates.forEach(g=>{g.x+=Math.sin(frame*.001*g.speed+g.phase)*.18;g.x=clamp(g.x,15,W-g.w-15)});
+ if(mode==='endless'&&frame>0&&Math.floor(frame/1000)%8===0&&Math.random()<.018){enemyShots.push({x:rnd(80,W-80),y:95,vx:rnd(-.3,.3),vy:rnd(2,3.2),r:6})}
+ for(const r of rockets){r.life++;r.x+=r.vx;r.y+=r.vy;r.trail.push([r.x,r.y]);if(r.trail.length>8)r.trail.shift();r.vx+=(aimX-r.x)*.00065;
+  for(const g of gates){if(r.y<g.y+g.h&&r.y>g.y-8&&r.x>g.x&&r.x<g.x+g.w)multiplyRocket(r,g)}
+  for(const w of walls){if(w.hp>0&&r.x>w.x&&r.x<w.x+w.w&&r.y>w.y&&r.y<w.y+w.h){w.hp--;r.dead=true;burst(r.x,r.y,'#c4b7b1',8);score+=8;if(w.hp<=0){burst(w.x+w.w/2,w.y+w.h/2,'#d7c6b7',22);score+=45}}}
+  if(r.y<105){r.dead=true;enemyHP-=r.power*4;score+=12;if(Math.random()<.18)burst(r.x,110,'#ff7348',5)}
+  if(r.x<-20||r.x>W+20||r.y<-30)r.dead=true;
+ }
+ rockets=rockets.filter(r=>!r.dead);walls=walls.filter(w=>w.hp>0);
+ for(const s of enemyShots){s.x+=s.vx;s.y+=s.vy;if(s.y>H-120){s.dead=true;castleHP-=12;burst(s.x,s.y,'#ff4b59',14);shake=7;if(castleHP<=0)finishGame(false)}}enemyShots=enemyShots.filter(s=>!s.dead);
+ for(const p of particles){p.x+=p.vx;p.y+=p.vy;p.vx*=.96;p.vy*=.96;p.life--}particles=particles.filter(p=>p.life>0);
+ if(enemyHP<=0){enemyHP=999999;stageWin();return}
+ if(volleyActive&&rockets.length===0){volleyActive=false;if(enemyHP>0){if(mode==='endless'){castleHP-=Math.max(4,9-level*.25);if(castleHP<=0){finishGame(false);return}}setMsg(`Fortress HP ${Math.max(0,Math.ceil(enemyHP))}. Launch again!`)}}
+ if(shake>0)shake*=.86;syncHud();
+}
+function draw(){ctx.save();if(shake>1)ctx.translate(rnd(-shake,shake),rnd(-shake,shake));
+ const sky=ctx.createLinearGradient(0,0,0,H);sky.addColorStop(0,'#22145c');sky.addColorStop(.45,'#123e75');sky.addColorStop(1,'#15112e');ctx.fillStyle=sky;ctx.fillRect(0,0,W,H);
+ for(const s of stars){ctx.globalAlpha=s.a;ctx.fillStyle='#d8eaff';ctx.fillRect(s.x,s.y,s.s,s.s)}ctx.globalAlpha=1;
+ ctx.fillStyle='#6d54bb44';ctx.beginPath();ctx.arc(500,175,95,0,Math.PI*2);ctx.fill();ctx.fillStyle='#4cc9ff22';ctx.beginPath();ctx.arc(100,285,65,0,Math.PI*2);ctx.fill();
+ drawEnemy(); drawGates(); drawWalls(); drawCastle(); drawAim();
+ for(const r of rockets){ctx.strokeStyle='#ff9139aa';ctx.lineWidth=3;ctx.beginPath();r.trail.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));ctx.stroke();ctx.fillStyle='#f3f5ff';ctx.beginPath();ctx.moveTo(r.x,r.y-8);ctx.lineTo(r.x-5,r.y+5);ctx.lineTo(r.x+5,r.y+5);ctx.closePath();ctx.fill();ctx.fillStyle='#45e2ff';ctx.beginPath();ctx.arc(r.x,r.y+5,3,0,Math.PI*2);ctx.fill()}
+ for(const s of enemyShots){ctx.fillStyle='#ff4058';ctx.shadowColor='#ff3155';ctx.shadowBlur=12;ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0}
+ for(const p of particles){ctx.globalAlpha=p.life/p.max;ctx.fillStyle=p.col;ctx.fillRect(p.x,p.y,p.s,p.s)}ctx.globalAlpha=1;ctx.restore()}
+function drawEnemy(){const hp=Math.max(0,enemyHP)/(100+level*32);ctx.fillStyle='#140b1a';ctx.fillRect(80,26,W-160,14);ctx.fillStyle='#ff425f';ctx.fillRect(80,26,(W-160)*clamp(hp,0,1),14);ctx.strokeStyle='#ffffff55';ctx.strokeRect(80,26,W-160,14);
+ ctx.fillStyle='#503542';ctx.fillRect(W/2-75,55,150,65);ctx.fillStyle='#6c4857';ctx.fillRect(W/2-54,38,35,45);ctx.fillRect(W/2+18,38,35,45);ctx.fillStyle='#2a1724';for(let i=-2;i<=2;i++)ctx.fillRect(W/2+i*24-7,83,14,25);ctx.fillStyle='#ffaf28';ctx.fillRect(W/2-7,61,14,22);ctx.font='bold 13px Arial';ctx.fillStyle='#fff';ctx.fillText('ENEMY FORTRESS',W/2-65,18)}
+function drawCastle(){const y=H-94;ctx.fillStyle='#273d5b';ctx.fillRect(W/2-72,y,144,54);ctx.fillStyle='#395a7f';ctx.fillRect(W/2-54,y-35,38,38);ctx.fillRect(W/2+16,y-35,38,38);ctx.fillStyle='#f2b530';ctx.fillRect(W/2-14,y+14,28,40);ctx.fillStyle='#111b2b';ctx.fillRect(W/2-95,y+44,190,18);ctx.fillStyle='#ffcc43';ctx.font='bold 12px Arial';ctx.fillText(`YOUR CASTLE ${Math.max(0,Math.ceil(castleHP))}%`,W/2-61,H-8)}
+function drawAim(){ctx.strokeStyle='#5fe8ff88';ctx.setLineDash([8,8]);ctx.beginPath();ctx.moveTo(W/2,H-130);ctx.lineTo(aimX,145);ctx.stroke();ctx.setLineDash([]);ctx.fillStyle='#62ecff';ctx.beginPath();ctx.arc(aimX,145,7,0,Math.PI*2);ctx.fill()}
+function drawGates(){for(const g of gates){const colors={2:'#39bfff',3:'#36e875',5:'#a95fff',10:'#ffbe2f',20:'#ff6543'};ctx.fillStyle=(colors[g.m]||'#ff59c7')+'44';ctx.fillRect(g.x,g.y,g.w,g.h);ctx.strokeStyle=colors[g.m]||'#fff';ctx.lineWidth=3;ctx.strokeRect(g.x,g.y,g.w,g.h);ctx.font='bold 21px Arial';ctx.fillStyle='#fff';ctx.textAlign='center';ctx.fillText('×'+g.m,g.x+g.w/2,g.y+25);ctx.textAlign='left'}}
+function drawWalls(){for(const w of walls){ctx.fillStyle='#716870';ctx.fillRect(w.x,w.y,w.w,w.h);for(let x=w.x+5;x<w.x+w.w;x+=20){ctx.fillStyle='#92888c';ctx.fillRect(x,w.y+4,13,w.h-8)}ctx.strokeStyle='#352f34';ctx.lineWidth=2;ctx.strokeRect(w.x,w.y,w.w,w.h)}}
+function loop(t){const dt=Math.min(32,t-last||16);last=t;update(dt);draw();requestAnimationFrame(loop)}requestAnimationFrame(loop);
+function startGame(m){mode=m;level=1;score=0;nova=1;running=true;paused=false;$('start').classList.add('hidden');$('over').classList.add('hidden');$('pauseBtn').textContent='⏸ PAUSE';resetStage();audio.ensure()}
+function quit(){finishGame(false)}
+function pointer(e){const r=cvs.getBoundingClientRect(),x=(e.clientX-r.left)*W/r.width;aimX=clamp(x,45,W-45)}
+cvs.addEventListener('pointerdown',e=>{pointer(e);cvs.setPointerCapture?.(e.pointerId)});cvs.addEventListener('pointermove',e=>{if(e.buttons||e.pressure>0)pointer(e)});
+$('launchBtn').onclick=fireVolley;$('novaBtn').onclick=siegeBlast;$('campaign').onclick=()=>startGame('campaign');$('endless').onclick=()=>startGame('endless');$('pauseBtn').onclick=()=>{if(!running)return;paused=!paused;$('pauseBtn').textContent=paused?'▶ RESUME':'⏸ PAUSE';setMsg(paused?'Game paused.':'Back to the siege!')};$('quitBtn').onclick=quit;$('again').onclick=()=>startGame(mode);$('home').onclick=()=>{$('over').classList.add('hidden');$('start').classList.remove('hidden')};
+</script>
+</body></html>
