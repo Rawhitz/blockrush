@@ -38,7 +38,7 @@ export const GAMES = {
   },
   ticrush: {
     shortName: 'ticrush',
-    url: 'https://rawhitz.github.io/blockrush/ticrush/',
+    url: 'https://rawhitz.github.io/blockrush/ticrush-clean/',
     title: 'TICRUSH',
   },
 };
