@@ -36,6 +36,11 @@ export const GAMES = {
     url: 'https://rawhitz.github.io/blockrush/castlerush/',
     title: 'CASTLERUSH',
   },
+  ticrush: {
+    shortName: 'ticrush',
+    url: 'https://rawhitz.github.io/blockrush/ticrush/',
+    title: 'TICRUSH',
+  },
 };
 
 export const GAME_SHORT_NAME = GAMES.blockrushsuper.shortName;
