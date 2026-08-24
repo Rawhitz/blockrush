@@ -41,13 +41,20 @@ export const GAMES = {
     url: 'https://rawhitz.github.io/blockrush/ticrush/',
     title: 'TICRUSH',
   },
+  CheckersRush: {
+    shortName: 'CheckersRush',
+    url: 'https://rawhitz.github.io/blockrush/checkersrush/',
+    title: 'CHECKERSRUSH',
+  },
 };
 
 export const GAME_SHORT_NAME = GAMES.blockrushsuper.shortName;
 export const GAME_URL = GAMES.blockrushsuper.url;
 
 export function getGame(shortName) {
-  return GAMES[shortName] || null;
+  if (GAMES[shortName]) return GAMES[shortName];
+  const needle = String(shortName || '').toLowerCase();
+  return Object.values(GAMES).find(g => g.shortName.toLowerCase() === needle) || null;
 }
 
 export function getBotToken() {
