@@ -1,0 +1,11 @@
+<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no"><title>TicRush</title></head><body style="margin:0;background:#050816;color:#fff;font-family:Arial;text-align:center"><p style="margin-top:40vh">Loading TicRush…</p><script>
+fetch('../ticrush/index.html?v=boards-3to5-20260824',{cache:'no-store'}).then(r=>r.text()).then(html=>{
+  html=html.replace('Classic Tic Tac Toe, scaled into tactical battles from 3×3 all the way to 7×7.','Classic Tic Tac Toe, scaled into tactical battles from 3×3 to 5×5.');
+  html=html.replace('.grid5{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}', '.grid5{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}');
+  html=html.replace('<div class="grid5" id="sizes"><button class="choice sel" data-size="3">3×3</button><button class="choice" data-size="4">4×4</button><button class="choice" data-size="5">5×5</button><button class="choice" data-size="6">6×6</button><button class="choice" data-size="7">7×7</button></div>','<div class="grid5" id="sizes"><button class="choice sel" data-size="3">3×3</button><button class="choice" data-size="4">4×4</button><button class="choice" data-size="5">5×5</button></div>');
+  html=html.replace('• 5×5 → 4 in a row<br>• 6×6 → 5 in a row<br>• 7×7 → 5 in a row','• 5×5 → 4 in a row');
+  html=html.replace('const WINLEN={3:3,4:4,5:4,6:5,7:5},BASE={3:100,4:250,5:500,6:800,7:1200},MULT={casual:1,smart:1.5,master:2.25};','const WINLEN={3:3,4:4,5:4},BASE={3:100,4:250,5:500},MULT={casual:1,smart:1.5,master:2.25};');
+  html=html.replace("const fs=size<=3?'68px':size===4?'54px':size===5?'43px':size===6?'36px':'31px';","const fs=size<=3?'68px':size===4?'54px':'43px';");
+  document.open();document.write(html);document.close();
+}).catch(()=>{document.body.innerHTML='<h2>TicRush failed to load</h2><p>Please reopen the game.</p>'});
+</script></body></html>
