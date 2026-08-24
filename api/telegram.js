@@ -44,7 +44,7 @@ export default async function handler(req, res) {
       if (text === '/start' || text.startsWith('/start@')) {
         await telegram('sendMessage', {
           chat_id: chatId,
-          text: '🎮 Welcome!\n\n/blockrush — play BLOCKRUSH\n/ludo — play LUDORUSH\n/snake — play SNAKERUSH\n/garden — play SNAKE GARDEN\n/cricket — play CRICKETRUSH 3D\n/space — play SPACE RUSH\n/castle — play CASTLERUSH\n/games — show all games',
+          text: '🎮 Welcome!\n\n/blockrush — play BLOCKRUSH\n/ludo — play LUDORUSH\n/snake — play SNAKERUSH\n/garden — play SNAKE GARDEN\n/cricket — play CRICKETRUSH 3D\n/space — play SPACE RUSH\n/castle — play CASTLERUSH\n/tic — play TICRUSH\n/games — show all games',
         });
       } else if (text === '/game' || text.startsWith('/game@') || text === '/blockrush' || text.startsWith('/blockrush@')) {
         await sendGame(chatId, 'blockrushsuper');
@@ -60,10 +60,12 @@ export default async function handler(req, res) {
         await sendGame(chatId, 'spacerush');
       } else if (text === '/castle' || text.startsWith('/castle@') || text === '/castlerush' || text.startsWith('/castlerush@')) {
         await sendGame(chatId, 'castlerush');
+      } else if (text === '/tic' || text.startsWith('/tic@') || text === '/ticrush' || text.startsWith('/ticrush@')) {
+        await sendGame(chatId, 'ticrush');
       } else if (text === '/games' || text.startsWith('/games@')) {
         await telegram('sendMessage', {
           chat_id: chatId,
-          text: '🎮 Choose a game:\n\n🧱 /blockrush — Stack. Smash. Survive!\n🎲 /ludo — Roll. Race. Win!\n🐍 /snake — Climb ladders. Dodge snakes. Race to 100!\n🌿 /garden — Classic Snake in a living garden!\n🏏 /cricket — Bat, bowl and play in 3D!\n🚀 /space — Blast. Dodge. Survive!\n🏰 /castle — Fire. Multiply. Destroy!',
+          text: '🎮 Choose a game:\n\n🧱 /blockrush — Stack. Smash. Survive!\n🎲 /ludo — Roll. Race. Win!\n🐍 /snake — Climb ladders. Dodge snakes. Race to 100!\n🌿 /garden — Classic Snake in a living garden!\n🏏 /cricket — Bat, bowl and play in 3D!\n🚀 /space — Blast. Dodge. Survive!\n🏰 /castle — Fire. Multiply. Destroy!\n❌⭕ /tic — Think. Block. Dominate!',
         });
       }
     }
@@ -77,7 +79,7 @@ export default async function handler(req, res) {
 
     if (update.inline_query) {
       const q = (update.inline_query.query || '').toLowerCase();
-      let gameNames = ['blockrushsuper', 'ludorush', 'snakerush', 'snakegarden', 'cricketrush', 'spacerush', 'castlerush'];
+      let gameNames = ['blockrushsuper', 'ludorush', 'snakerush', 'snakegarden', 'cricketrush', 'spacerush', 'castlerush', 'ticrush'];
       if (q.includes('ludo')) gameNames = ['ludorush'];
       if (q.includes('block')) gameNames = ['blockrushsuper'];
       if (q.includes('garden')) gameNames = ['snakegarden'];
@@ -85,6 +87,7 @@ export default async function handler(req, res) {
       if (q.includes('cricket')) gameNames = ['cricketrush'];
       if (q.includes('space')) gameNames = ['spacerush'];
       if (q.includes('castle')) gameNames = ['castlerush'];
+      if (q.includes('tic')) gameNames = ['ticrush'];
 
       await telegram('answerInlineQuery', {
         inline_query_id: update.inline_query.id,
