@@ -1,55 +1,61 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" />
-  <meta name="theme-color" content="#171225" />
-  <title>SnakeRaidRush</title>
-  <link rel="stylesheet" href="style.css" />
-  <script src="https://telegram.org/js/games.js"></script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#100a20">
+<title>SnakeRaidRush</title>
+<link rel="stylesheet" href="style.css?v=4">
+<script src="https://telegram.org/js/games.js"></script>
 </head>
 <body>
 <div id="app">
-  <canvas id="game"></canvas>
+<canvas id="game"></canvas>
 
-  <div id="hud" class="hidden">
-    <div class="topbar"><div class="brand">🐍 SnakeRaidRush</div><div class="currency"><span>🪙 <b id="coins">0</b></span><span>💎 <b id="gems">0</b></span></div></div>
-    <div class="stage-row"><span id="stageLabel">Stage 1 · Thorncoil</span><span id="progressLabel">0%</span></div>
-    <div class="progress"><div id="progressFill"></div></div>
-    <div id="power">⚔️ Power <b id="powerValue">4.11K</b></div><div id="combo">COMBO x<span>1</span></div>
-  </div>
-
-  <div id="skills" class="hidden">
-    <button class="skill" data-skill="bomb"><span>💣</span><small>Royal Bomb</small><i></i></button>
-    <button class="skill" data-skill="toxic"><span>🧪</span><small>Toxic Flask</small><i></i></button>
-    <button class="skill" data-skill="spirit"><span>🟣</span><small>Shadow Orb</small><i></i></button>
-    <button class="skill" data-skill="split"><span>🏹</span><small>Split Shot</small><i></i></button>
-  </div>
-
-  <div id="home" class="overlay home-screen">
-    <div class="home-card">
-      <div class="crest">👑</div>
-      <div class="logo">🐍<span>SnakeRaidRush</span></div>
-      <div class="tagline">SLAY · UPGRADE · LOOT · REPEAT</div>
-      <div class="boss-preview"><div class="boss-ring">🐉</div><div><b id="homeStageName">Thorncoil</b><small id="homeStageText">Stage 1 · Forest Serpent</small></div></div>
-      <div class="wallet"><span>🪙 <b id="bankCoins">0</b></span><span>💎 <b id="bankGems">0</b></span><span>🏆 <b id="bestStage">1</b></span></div>
-      <div class="stage-pick"><button id="prevStage">‹</button><div><small>SELECTED RAID</small><b id="selectedStage">Stage 1</b></div><button id="nextStagePick">›</button></div>
-      <button id="playBtn" class="primary hero-btn">⚔️ START RAID</button>
-      <div class="home-actions"><button id="upgradeBtn" class="secondary">⬆️ Permanent Upgrades</button><button id="soundBtn" class="secondary">🔊 Sound On</button></div>
-      <div class="dev">Developed by <strong>@RawHitz</strong></div>
-    </div>
-  </div>
-
-  <div id="meta" class="overlay hidden"><div class="panel meta-panel"><div class="ribbon">PERMANENT UPGRADES</div><p class="hint">Spend raid loot. These bonuses stay forever.</p><div class="meta-grid">
-    <button class="meta-up" data-up="attack"><span>🏹</span><b>Arrow Power</b><small id="attackLv">Lv 1</small><em id="attackCost">200 🪙</em></button>
-    <button class="meta-up" data-up="crit"><span>🎯</span><b>Critical Eye</b><small id="critLv">Lv 1</small><em id="critCost">250 🪙</em></button>
-    <button class="meta-up" data-up="skill"><span>✨</span><b>Arcane Core</b><small id="skillLv">Lv 1</small><em id="skillCost">8 💎</em></button>
-  </div><button id="closeMeta" class="secondary">BACK</button></div></div>
-
-  <div id="upgrade" class="overlay hidden"><div class="panel"><div class="ribbon">CHOOSE AN ENHANCEMENT</div><p class="hint">Pick one. Your build changes instantly.</p><div id="cards" class="cards"></div></div></div>
-
-  <div id="result" class="overlay hidden"><div class="panel result-panel"><div class="ribbon">VICTORY!</div><h2 id="resultTitle">Thorncoil defeated</h2><div class="loot"><div>🪙<b id="rewardCoins">850</b><span>Coins</span></div><div>💎<b id="rewardGems">25</b><span>Gems</span></div><div>🏹<b id="rewardShards">2</b><span>Skill Shards</span></div><div>🏆<b id="scoreReward">0</b><span>Raid Score</span></div></div><button id="nextBtn" class="primary">NEXT RAID</button><button id="restartBtn" class="secondary">REPLAY</button><button id="homeBtn" class="secondary">HOME</button></div></div>
+<div id="hud" class="hidden">
+  <div class="hud-top"><div class="hud-brand">🐍 SnakeRaidRush</div><div class="hud-money"><span>🪙 <b id="coins">0</b></span><span>💎 <b id="gems">0</b></span></div></div>
+  <div class="hud-stage"><span id="stageLabel">Stage 1 · Thorncoil</span><span id="progressLabel">0%</span></div>
+  <div class="progress"><div id="progressFill"></div></div>
+  <div id="power">⚔️ <b id="powerValue">4.11K</b></div>
+  <div id="combo">COMBO x<span>1</span></div>
 </div>
-<script src="game.js"></script>
+
+<div id="skills" class="hidden">
+  <button class="skill" data-skill="bomb"><span>💣</span><small>Royal Bomb</small><i></i></button>
+  <button class="skill" data-skill="toxic"><span>🧪</span><small>Toxic Flask</small><i></i></button>
+  <button class="skill" data-skill="spirit"><span>🟣</span><small>Shadow Orb</small><i></i></button>
+  <button class="skill" data-skill="split"><span>🏹</span><small>Split Shot</small><i></i></button>
+</div>
+
+<section id="home" class="home-screen">
+  <div class="sky-glow"></div><div class="snake-art"><div class="snake-head">🐲</div><div class="coil c1"></div><div class="coil c2"></div><div class="coil c3"></div></div>
+  <div class="home-content">
+    <div class="eyebrow">⚔️ RAWHiTZ GAMES PRESENTS</div>
+    <h1>Snake<span>Raid</span>Rush</h1>
+    <div class="tagline">SLAY · UPGRADE · LOOT · REPEAT</div>
+    <div class="boss-card">
+      <div class="boss-orb" id="bossOrb">🐉</div>
+      <div class="boss-copy"><small>SELECTED RAID</small><strong id="homeStageName">Thorncoil</strong><span id="homeStageText">Stage 1 · Forest Serpent</span></div>
+      <div class="danger">BOSS</div>
+    </div>
+    <div class="wallet"><div>🪙<b id="bankCoins">0</b><small>COINS</small></div><div>💎<b id="bankGems">0</b><small>GEMS</small></div><div>🏆<b id="bestStage">1</b><small>BEST</small></div></div>
+    <div class="stage-pick"><button id="prevStage" aria-label="Previous stage">‹</button><div><small>RAID LEVEL</small><b id="selectedStage">Stage 1</b></div><button id="nextStagePick" aria-label="Next stage">›</button></div>
+    <button id="playBtn" class="primary start-btn"><span>⚔️</span> START RAID <em>▶</em></button>
+    <div class="home-actions"><button id="upgradeBtn" class="secondary">⬆️ <span>Permanent Upgrades</span></button><button id="soundBtn" class="secondary">🔊 <span>Sound On</span></button></div>
+    <div class="dev">Developed by <strong>@RawHitz</strong></div>
+  </div>
+</section>
+
+<div id="meta" class="overlay hidden"><div class="panel"><div class="ribbon">PERMANENT UPGRADES</div><p class="hint">Spend raid loot. These bonuses stay forever.</p><div class="meta-grid">
+<button class="meta-up" data-up="attack"><span>🏹</span><b>Arrow Power</b><small id="attackLv">Lv 1</small><em id="attackCost">200 🪙</em></button>
+<button class="meta-up" data-up="crit"><span>🎯</span><b>Critical Eye</b><small id="critLv">Lv 1</small><em id="critCost">250 🪙</em></button>
+<button class="meta-up" data-up="skill"><span>✨</span><b>Arcane Core</b><small id="skillLv">Lv 1</small><em id="skillCost">10 💎</em></button>
+</div><button id="closeMeta" class="secondary wide">BACK</button></div></div>
+
+<div id="upgrade" class="overlay hidden"><div class="panel"><div class="ribbon">CHOOSE AN ENHANCEMENT</div><p class="hint">Pick one. Your build changes instantly.</p><div id="cards" class="cards"></div></div></div>
+
+<div id="result" class="overlay hidden"><div class="panel result-panel"><div class="ribbon">VICTORY!</div><h2 id="resultTitle">Thorncoil defeated</h2><div class="loot"><div>🪙<b id="rewardCoins">0</b><span>Coins</span></div><div>💎<b id="rewardGems">0</b><span>Gems</span></div><div>🏹<b id="rewardShards">0</b><span>Shards</span></div><div>🏆<b id="scoreReward">0</b><span>Raid Score</span></div></div><button id="nextBtn" class="primary wide">NEXT RAID</button><button id="restartBtn" class="secondary wide">REPLAY</button><button id="homeBtn" class="secondary wide">HOME</button></div></div>
+</div>
+<script src="game.js?v=4"></script>
 </body>
 </html>
