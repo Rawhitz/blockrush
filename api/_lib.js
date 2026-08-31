@@ -1,51 +1,16 @@
 import crypto from 'crypto';
 
 export const GAMES = {
-  blockrushsuper: {
-    shortName: 'blockrushsuper',
-    url: 'https://rawhitz.github.io/blockrush/',
-    title: 'BLOCKRUSH',
-  },
-  ludorush: {
-    shortName: 'ludorush',
-    url: 'https://rawhitz.github.io/blockrush/ludorush-clean/',
-    title: 'LUDORUSH',
-  },
-  snakerush: {
-    shortName: 'snakerush',
-    url: 'https://rawhitz.github.io/blockrush/snakerush-clean/',
-    title: 'SNAKERUSH',
-  },
-  snakegarden: {
-    shortName: 'snakegarden',
-    url: 'https://rawhitz.github.io/blockrush/snakegarden/',
-    title: 'SNAKE GARDEN',
-  },
-  cricketrush: {
-    shortName: 'cricketrush',
-    url: 'https://rawhitz.github.io/blockrush/cricketrush-v6/',
-    title: 'CRICKETRUSH 3D',
-  },
-  spacerush: {
-    shortName: 'spacerush',
-    url: 'https://rawhitz.github.io/blockrush/spacerush/play.html',
-    title: 'SPACE RUSH',
-  },
-  castlerush: {
-    shortName: 'castlerush',
-    url: 'https://rawhitz.github.io/blockrush/castlerush/',
-    title: 'CASTLERUSH',
-  },
-  ticrush: {
-    shortName: 'ticrush',
-    url: 'https://rawhitz.github.io/blockrush/ticrush/',
-    title: 'TICRUSH',
-  },
-  CheckersRush: {
-    shortName: 'CheckersRush',
-    url: 'https://rawhitz.github.io/blockrush/checkersrush/',
-    title: 'CHECKERSRUSH',
-  },
+  blockrushsuper: { shortName: 'blockrushsuper', url: 'https://rawhitz.github.io/blockrush/', title: 'BLOCKRUSH' },
+  ludorush: { shortName: 'ludorush', url: 'https://rawhitz.github.io/blockrush/ludorush-clean/', title: 'LUDORUSH' },
+  snakerush: { shortName: 'snakerush', url: 'https://rawhitz.github.io/blockrush/snakerush-clean/', title: 'SNAKERUSH' },
+  snakegarden: { shortName: 'snakegarden', url: 'https://rawhitz.github.io/blockrush/snakegarden/', title: 'SNAKE GARDEN' },
+  cricketrush: { shortName: 'cricketrush', url: 'https://rawhitz.github.io/blockrush/cricketrush-v6/', title: 'CRICKETRUSH 3D' },
+  spacerush: { shortName: 'spacerush', url: 'https://rawhitz.github.io/blockrush/spacerush/play.html', title: 'SPACE RUSH' },
+  castlerush: { shortName: 'castlerush', url: 'https://rawhitz.github.io/blockrush/castlerush/', title: 'CASTLERUSH' },
+  ticrush: { shortName: 'ticrush', url: 'https://rawhitz.github.io/blockrush/ticrush/', title: 'TICRUSH' },
+  CheckersRush: { shortName: 'CheckersRush', url: 'https://rawhitz.github.io/blockrush/checkersrush/', title: 'CHECKERSRUSH' },
+  snakeraidrush: { shortName: 'snakeraidrush', url: 'https://rawhitz.github.io/blockrush/snakeraidrush/', title: 'SNAKERAIDRUSH' },
 };
 
 export const GAME_SHORT_NAME = GAMES.blockrushsuper.shortName;
@@ -66,47 +31,30 @@ export function getBotToken() {
 export async function telegram(method, payload = {}) {
   const token = getBotToken();
   const response = await fetch(`https://api.telegram.org/bot${token}/${method}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
+    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload),
   });
-
   const data = await response.json();
-  if (!data.ok) {
-    throw new Error(`${method} failed: ${data.description || 'Unknown Telegram error'}`);
-  }
+  if (!data.ok) throw new Error(`${method} failed: ${data.description || 'Unknown Telegram error'}`);
   return data.result;
 }
 
-function signingKey() {
-  return crypto.createHash('sha256').update(getBotToken()).digest();
-}
-
-export function webhookSecret() {
-  return crypto
-    .createHash('sha256')
-    .update(`${getBotToken()}:blockrush-webhook`)
-    .digest('hex');
-}
-
+function signingKey() { return crypto.createHash('sha256').update(getBotToken()).digest(); }
+export function webhookSecret() { return crypto.createHash('sha256').update(`${getBotToken()}:blockrush-webhook`).digest('hex'); }
 export function signLaunch(data) {
   const payload = Buffer.from(JSON.stringify(data)).toString('base64url');
   const sig = crypto.createHmac('sha256', signingKey()).update(payload).digest('base64url');
   return `${payload}.${sig}`;
 }
-
 export function verifyLaunch(token) {
   if (!token || !token.includes('.')) throw new Error('Missing launch token');
   const [payload, sig] = token.split('.');
   const expected = crypto.createHmac('sha256', signingKey()).update(payload).digest('base64url');
-  const a = Buffer.from(sig);
-  const b = Buffer.from(expected);
+  const a = Buffer.from(sig), b = Buffer.from(expected);
   if (a.length !== b.length || !crypto.timingSafeEqual(a, b)) throw new Error('Invalid launch token');
   const data = JSON.parse(Buffer.from(payload, 'base64url').toString('utf8'));
   if (!data.exp || Date.now() > data.exp) throw new Error('Launch token expired');
   return data;
 }
-
 export function allowCors(res) {
   res.setHeader('Access-Control-Allow-Origin', 'https://rawhitz.github.io');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
