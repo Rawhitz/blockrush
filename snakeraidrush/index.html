@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" />
+  <meta name="theme-color" content="#171225" />
+  <title>SnakeRaidRush</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://telegram.org/js/games.js"></script>
+</head>
+<body>
+  <div id="app">
+    <canvas id="game"></canvas>
+    <div id="hud">
+      <div class="topbar"><div class="brand"><span class="snake">🐍</span> SnakeRaidRush</div><div class="currency"><span>🪙 <b id="coins">0</b></span><span>💎 <b id="gems">0</b></span></div></div>
+      <div class="stage-row"><span id="stageLabel">Stage 1 · Thorncoil</span><span id="progressLabel">0%</span></div>
+      <div class="progress"><div id="progressFill"></div></div>
+      <div id="power">⚔️ Power <b>4.11K</b></div><div id="combo">COMBO x<span>1</span></div>
+    </div>
+    <div id="skills">
+      <button class="skill" data-skill="bomb"><span>💣</span><small>Royal Bomb</small><i></i></button>
+      <button class="skill" data-skill="toxic"><span>🧪</span><small>Toxic Flask</small><i></i></button>
+      <button class="skill" data-skill="spirit"><span>🟣</span><small>Shadow Orb</small><i></i></button>
+      <button class="skill" data-skill="split"><span>🏹</span><small>Split Shot</small><i></i></button>
+    </div>
+    <div id="upgrade" class="overlay hidden"><div class="panel"><div class="ribbon">CHOOSE AN ENHANCEMENT</div><p class="hint">Pick one. Your build changes instantly.</p><div id="cards" class="cards"></div></div></div>
+    <div id="result" class="overlay hidden"><div class="panel result-panel"><div class="ribbon">VICTORY!</div><h2>Thorncoil defeated</h2><div class="loot"><div>🪙<b id="rewardCoins">850</b><span>Coins</span></div><div>💎<b id="rewardGems">25</b><span>Gems</span></div><div>🏹<b>2</b><span>Skill Shards</span></div><div>🟣<b>1</b><span>Spirit Core</span></div></div><button id="nextBtn" class="primary">NEXT RAID</button><button id="restartBtn" class="secondary">Replay</button></div></div>
+    <div id="start" class="overlay"><div class="panel intro"><div class="logo">🐍<span>SnakeRaidRush</span></div><div class="tagline">SLAY · UPGRADE · LOOT · REPEAT</div><p>Drag the hero to dodge. Attacks are automatic. Break the serpent before it reaches you.</p><button id="playBtn" class="primary">START RAID</button><small>Stage 1 · Thorncoil</small></div></div>
+  </div>
+  <script src="game.js"></script>
+</body>
+</html>
