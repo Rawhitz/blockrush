@@ -4,7 +4,6 @@ export default async function handler(req, res) {
   try {
     const host = req.headers.host;
     if (!host) throw new Error('Missing host');
-
     const webhookUrl = `https://${host}/api/telegram`;
 
     await telegram('setWebhook', {
@@ -14,13 +13,24 @@ export default async function handler(req, res) {
       drop_pending_updates: true,
     });
 
-    const info = await telegram('getWebhookInfo');
-
-    return res.status(200).json({
-      ok: true,
-      message: 'BLOCKRUSH webhook configured',
-      webhook: info,
+    await telegram('setMyCommands', {
+      commands: [
+        { command: 'games', description: 'Show all RawHitz games' },
+        { command: 'blockrush', description: 'Play BLOCKRUSH' },
+        { command: 'ludo', description: 'Play Ludo Rush' },
+        { command: 'snake', description: 'Play Snake Rush' },
+        { command: 'garden', description: 'Play Snake Garden' },
+        { command: 'cricket', description: 'Play CricketRush 3D' },
+        { command: 'space', description: 'Play Space Rush' },
+        { command: 'castle', description: 'Play Castle Rush' },
+        { command: 'tic', description: 'Play Tic Rush' },
+        { command: 'checkers', description: 'Play CheckersRush' },
+        { command: 'snakeraid', description: 'Play SnakeRaidRush' },
+      ],
     });
+
+    const info = await telegram('getWebhookInfo');
+    return res.status(200).json({ ok: true, message: 'RawHitz games webhook and commands configured', webhook: info });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ ok: false, error: error.message });
