@@ -26,6 +26,7 @@ export default async function handler(req, res) {
         { command: 'tic', description: 'Play Tic Rush' },
         { command: 'checkers', description: 'Play CheckersRush' },
         { command: 'snakeraid', description: 'Play SnakeRaidRush' },
+        { command: 'balls', description: 'Play Balls Rush' },
       ],
     });
 
