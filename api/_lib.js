@@ -11,6 +11,7 @@ export const GAMES = {
   ticrush: { shortName: 'ticrush', url: 'https://rawhitz.github.io/blockrush/ticrush/', title: 'TICRUSH' },
   CheckersRush: { shortName: 'CheckersRush', url: 'https://rawhitz.github.io/blockrush/checkersrush/', title: 'CHECKERSRUSH' },
   snakeraidrush: { shortName: 'snakeraidrush', url: 'https://rawhitz.github.io/blockrush/snakeraidrush/', title: 'SNAKERAIDRUSH' },
+  ballsrush: { shortName: 'ballsrush', url: 'https://rawhitz.github.io/blockrush/ballsrush/', title: 'BALLS RUSH' },
 };
 
 export const GAME_SHORT_NAME = GAMES.blockrushsuper.shortName;
