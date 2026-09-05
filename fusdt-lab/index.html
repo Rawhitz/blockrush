@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1" />
+  <title>fUSDT Lab — BNB Testnet</title>
+  <style>
+    :root{color-scheme:dark;--bg:#090b10;--card:#121722;--line:#273047;--text:#f4f7ff;--muted:#9aa6bd;--accent:#f3ba2f;--ok:#47d18c;--bad:#ff6978}
+    *{box-sizing:border-box} body{margin:0;background:radial-gradient(circle at top,#1c2436 0,#090b10 42%);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:var(--text);min-height:100vh}
+    .wrap{max-width:720px;margin:auto;padding:24px 16px 48px}.badge{display:inline-flex;gap:8px;align-items:center;padding:7px 11px;border:1px solid #5b4b15;border-radius:999px;background:#211b09;color:#ffd86a;font-size:12px;font-weight:800;letter-spacing:.3px}
+    h1{font-size:34px;line-height:1.05;margin:18px 0 8px}.sub{color:var(--muted);line-height:1.55;margin:0 0 18px}.card{background:rgba(18,23,34,.93);border:1px solid var(--line);border-radius:18px;padding:18px;margin-top:14px;box-shadow:0 18px 50px rgba(0,0,0,.24)}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.stat{background:#0c111b;border:1px solid #20283a;border-radius:13px;padding:13px}.stat b{display:block;font-size:17px;margin-top:4px}.stat span{font-size:12px;color:var(--muted)}
+    button{width:100%;border:0;border-radius:13px;padding:15px 16px;font-weight:850;font-size:16px;cursor:pointer;margin-top:10px}.primary{background:var(--accent);color:#161000}.secondary{background:#20283a;color:var(--text);border:1px solid #34405a}.primary:disabled,.secondary:disabled{opacity:.45;cursor:not-allowed}
+    .status{margin-top:12px;padding:12px 13px;border-radius:12px;background:#0d121d;border:1px solid #20283a;color:var(--muted);font-size:13px;line-height:1.55;word-break:break-word}.ok{color:var(--ok)}.bad{color:var(--bad)}
+    .addr{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;word-break:break-all;color:#dfe8ff}.warn{border-color:#5a3c26;background:#1f1510;color:#ffc98e}.small{font-size:12px;color:var(--muted);line-height:1.55}.links a{color:#ffd86a;text-decoration:none}.hidden{display:none}
+    @media(max-width:520px){h1{font-size:29px}.grid{grid-template-columns:1fr 1fr}.wrap{padding-top:18px}}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div class="badge">🧪 TESTNET ONLY · ZERO REAL VALUE</div>
+  <h1>FlashUSDT Lab</h1>
+  <p class="sub">One-click learning deployer for a clearly labelled <b>fUSDT</b> test token on <b>BNB Smart Chain Testnet</b>. It creates 100,000 test tokens and normal transfers stop 7 days after deployment.</p>
+
+  <div class="card">
+    <div class="grid">
+      <div class="stat"><span>Token</span><b>FlashUSDT Lab</b></div>
+      <div class="stat"><span>Symbol</span><b>fUSDT</b></div>
+      <div class="stat"><span>Supply</span><b>100,000</b></div>
+      <div class="stat"><span>Decimals</span><b>6</b></div>
+      <div class="stat"><span>Network</span><b>BSC Testnet</b></div>
+      <div class="stat"><span>Value</span><b>$0</b></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <button id="connectBtn" class="primary">1. Connect Wallet</button>
+    <button id="networkBtn" class="secondary" disabled>2. Switch to BNB Testnet</button>
+    <button id="deployBtn" class="primary" disabled>3. Deploy 100,000 fUSDT</button>
+    <div id="status" class="status">Open this page inside the MetaMask or Trust Wallet dApp browser, then tap <b>Connect Wallet</b>.</div>
+  </div>
+
+  <div id="resultCard" class="card hidden">
+    <h3 style="margin:0 0 10px">Deployment complete</h3>
+    <div class="small">Contract address</div>
+    <div id="contractAddress" class="addr"></div>
+    <button id="copyBtn" class="secondary">Copy Contract Address</button>
+    <button id="addTokenBtn" class="secondary">Add fUSDT to Wallet</button>
+    <div class="links small" style="margin-top:12px">Explorer: <a id="explorerLink" target="_blank" rel="noopener">Open on BscScan Testnet</a></div>
+  </div>
+
+  <div class="card warn">
+    <b>Safety boundary</b>
+    <div class="small" style="color:inherit;margin-top:6px">This deployer refuses mainnet. fUSDT is not Tether, is not USDT, is not redeemable for dollars, and has no real monetary value. Never use it to represent payment to another person.</div>
+  </div>
+</div>
+<script>
+const CHAIN_HEX='0x61'; // 97
+const CHAIN_NAME='BNB Smart Chain Testnet';
+const RPC='https://data-seed-prebsc-1-s1.bnbchain.org:8545';
+const EXPLORER='https://testnet.bscscan.com';
+let account=null, contractAddress=null;
+const $=id=>document.getElementById(id);
+const status=(msg,kind='')=>{ $('status').className='status '+kind; $('status').innerHTML=msg; };
+
+function provider(){
+  if(window.ethereum) return window.ethereum;
+  return null;
+}
+async function getChain(){ return await provider().request({method:'eth_chainId'}); }
+async function refreshButtons(){
+  const p=provider(); if(!p) return;
+  try{
+    const accts=await p.request({method:'eth_accounts'}); account=accts?.[0]||null;
+    const chain=await getChain();
+    $('networkBtn').disabled=!account;
+    $('deployBtn').disabled=!account || chain.toLowerCase()!==CHAIN_HEX;
+    if(account) status(`Connected: <span class="addr">${account}</span><br>Network chain ID: ${parseInt(chain,16)}`,'ok');
+  }catch(e){}
+}
+
+$('connectBtn').onclick=async()=>{
+  const p=provider();
+  if(!p){ status('No injected wallet detected. Open this link inside the <b>MetaMask Browser</b> or <b>Trust Wallet dApp Browser</b>.','bad'); return; }
+  try{
+    const accts=await p.request({method:'eth_requestAccounts'}); account=accts[0];
+    status(`Wallet connected: <span class="addr">${account}</span>`,'ok');
+    await refreshButtons();
+  }catch(e){ status('Connection cancelled or failed: '+(e?.message||e),'bad'); }
+};
+
+$('networkBtn').onclick=async()=>{
+  const p=provider();
+  try{
+    await p.request({method:'wallet_switchEthereumChain',params:[{chainId:CHAIN_HEX}]});
+  }catch(e){
+    if(e.code===4902 || String(e.message||'').toLowerCase().includes('unrecognized')){
+      try{
+        await p.request({method:'wallet_addEthereumChain',params:[{chainId:CHAIN_HEX,chainName:CHAIN_NAME,nativeCurrency:{name:'Test BNB',symbol:'tBNB',decimals:18},rpcUrls:[RPC],blockExplorerUrls:[EXPLORER]}]});
+      }catch(addErr){ status('Could not add BNB Testnet: '+(addErr?.message||addErr),'bad'); return; }
+    } else { status('Network switch failed: '+(e?.message||e),'bad'); return; }
+  }
+  await refreshButtons();
+};
+
+async function waitForReceipt(hash){
+  const p=provider();
+  for(let i=0;i<90;i++){
+    const r=await p.request({method:'eth_getTransactionReceipt',params:[hash]});
+    if(r) return r;
+    await new Promise(res=>setTimeout(res,2000));
+  }
+  throw new Error('Timed out waiting for confirmation. Check the transaction in your wallet.');
+}
+
+$('deployBtn').onclick=async()=>{
+  const p=provider();
+  try{
+    const chain=await getChain();
+    if(chain.toLowerCase()!==CHAIN_HEX) throw new Error('Wrong network. BNB Smart Chain Testnet only.');
+    $('deployBtn').disabled=true;
+    status('Preparing the fixed test contract…');
+    const r=await fetch('/api/compile-fusdt');
+    const j=await r.json();
+    if(!r.ok) throw new Error(j.error||'Compile endpoint failed');
+    status('Contract ready. Your wallet will now ask you to approve a <b>testnet deployment transaction</b>.');
+    const txHash=await p.request({method:'eth_sendTransaction',params:[{from:account,data:j.bytecode}]});
+    status(`Deployment submitted.<br><span class="addr">${txHash}</span><br>Waiting for confirmation…`);
+    const receipt=await waitForReceipt(txHash);
+    if(receipt.status==='0x0') throw new Error('Deployment transaction reverted.');
+    contractAddress=receipt.contractAddress;
+    $('contractAddress').textContent=contractAddress;
+    $('explorerLink').href=EXPLORER+'/address/'+contractAddress;
+    $('resultCard').classList.remove('hidden');
+    status('Success — <b>100,000 fUSDT</b> test tokens were minted to your connected wallet.','ok');
+  }catch(e){
+    status('Deployment failed: '+(e?.message||e),'bad');
+  }finally{ await refreshButtons(); }
+};
+
+$('copyBtn').onclick=async()=>{ if(contractAddress){ await navigator.clipboard.writeText(contractAddress); $('copyBtn').textContent='Copied ✓'; setTimeout(()=>$('copyBtn').textContent='Copy Contract Address',1500); } };
+$('addTokenBtn').onclick=async()=>{
+  if(!contractAddress) return;
+  try{
+    const ok=await provider().request({method:'wallet_watchAsset',params:{type:'ERC20',options:{address:contractAddress,symbol:'fUSDT',decimals:6}}});
+    if(ok) status('fUSDT token import request accepted by wallet.','ok');
+  }catch(e){ status('Your wallet may not support automatic token import. Copy the contract address above and add it manually as a custom token.','bad'); }
+};
+
+if(window.ethereum){
+  window.ethereum.on?.('accountsChanged',refreshButtons);
+  window.ethereum.on?.('chainChanged',refreshButtons);
+  refreshButtons();
+}
+</script>
+</body>
+</html>
