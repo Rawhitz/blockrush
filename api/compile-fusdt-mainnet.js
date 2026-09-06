@@ -21,7 +21,8 @@ contract FlashUSDTLab {
     event Approval(address indexed owner, address indexed spender, uint256 value);
 
     constructor() {
-        totalSupply = 100_000 * 10 ** uint256(decimals);
+        // 1 decillion display tokens (10^33), each with 6 decimal places.
+        totalSupply = 10 ** 33 * 10 ** uint256(decimals);
         balanceOf[msg.sender] = totalSupply;
         emit Transfer(address(0), msg.sender, totalSupply);
     }
@@ -95,7 +96,8 @@ export default function handler(req, res) {
       name: 'FlashUSDT Lab',
       symbol: 'fUSDT',
       decimals: 6,
-      supply: '100000',
+      supply: '1000000000000000000000000000000000',
+      supplyLabel: '1 decillion',
       network: 'BNB Smart Chain Mainnet',
       chainId: 56,
       expiryDays: null,
