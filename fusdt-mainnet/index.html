@@ -13,24 +13,24 @@
 <div class="wrap">
   <div class="badge">⚠️ BSC MAINNET · REAL BNB GAS · EDUCATIONAL TOKEN</div>
   <h1>FlashUSDT Lab</h1>
-  <p class="sub">Mainnet learning deployment of <b>fUSDT</b>. Same name, symbol, 6 decimals and 100,000 supply as the testnet lab, but this version has <b>no 7-day expiry</b>. It is not pegged, backed, redeemable, or Tether USDT.</p>
+  <p class="sub">Mainnet learning deployment of <b>fUSDT</b>. Same name, symbol and 6 decimals as the testnet lab, but this version mints <b>1 decillion fUSDT</b> and has <b>no 7-day expiry</b>. It is not pegged, backed, redeemable, or Tether USDT.</p>
 
   <div class="card"><div class="grid">
     <div class="stat"><span>Token</span><b>FlashUSDT Lab</b></div>
     <div class="stat"><span>Symbol</span><b>fUSDT</b></div>
-    <div class="stat"><span>Supply</span><b>100,000</b></div>
+    <div class="stat"><span>Supply</span><b>1 decillion</b></div>
     <div class="stat"><span>Decimals</span><b>6</b></div>
     <div class="stat"><span>Network</span><b>BSC Mainnet</b></div>
     <div class="stat"><span>Market price</span><b>None / $0</b></div>
   </div></div>
 
-  <div class="card warn"><b>Before deploying</b><div class="small" style="color:inherit;margin-top:6px">The deployment transaction spends real BNB for gas. The 100,000 fUSDT created by the contract are not $100,000 and have no automatic market value.</div></div>
+  <div class="card warn"><b>Before deploying</b><div class="small" style="color:inherit;margin-top:6px">The deployment transaction spends real BNB for gas. One decillion fUSDT is only a token supply number; it does not create any dollar value, backing, liquidity, or $1 peg.</div></div>
 
   <div class="card">
     <button id="connectBtn" class="primary">1. Connect Wallet</button>
     <button id="networkBtn" class="secondary" disabled>2. Switch to BNB Mainnet</button>
     <div class="check"><input id="ack" type="checkbox"><label for="ack">I understand this is an educational token, not Tether USDT, has no $1 peg or backing, and deployment uses real BNB gas.</label></div>
-    <button id="deployBtn" class="primary" disabled>3. Deploy 100,000 fUSDT</button>
+    <button id="deployBtn" class="primary" disabled>3. Deploy 1 decillion fUSDT</button>
     <div id="status" class="status">Open this page inside MetaMask's browser, connect the wallet that holds your real BNB, then review the wallet's gas quote before approving.</div>
   </div>
 
@@ -43,7 +43,7 @@
   </div>
 </div>
 <script>
-const CHAIN_HEX='0x38'; // BSC Mainnet 56
+const CHAIN_HEX='0x38';
 const CHAIN_NAME='BNB Smart Chain';
 const RPC='https://bsc-dataseed.binance.org';
 const EXPLORER='https://bscscan.com';
@@ -57,7 +57,7 @@ $('ack').onchange=refreshButtons;
 $('connectBtn').onclick=async()=>{const p=provider();if(!p){status('No injected wallet detected. Open this page inside the MetaMask browser.','bad');return;}try{const accts=await p.request({method:'eth_requestAccounts'});account=accts[0];await refreshButtons();}catch(e){status('Connection cancelled or failed: '+(e?.message||e),'bad');}};
 $('networkBtn').onclick=async()=>{const p=provider();try{await p.request({method:'wallet_switchEthereumChain',params:[{chainId:CHAIN_HEX}]});}catch(e){if(e.code===4902||String(e.message||'').toLowerCase().includes('unrecognized')){try{await p.request({method:'wallet_addEthereumChain',params:[{chainId:CHAIN_HEX,chainName:CHAIN_NAME,nativeCurrency:{name:'BNB',symbol:'BNB',decimals:18},rpcUrls:[RPC],blockExplorerUrls:[EXPLORER]}]});}catch(addErr){status('Could not add BNB Mainnet: '+(addErr?.message||addErr),'bad');return;}}else{status('Network switch failed: '+(e?.message||e),'bad');return;}}await refreshButtons();};
 async function waitForReceipt(hash){const p=provider();for(let i=0;i<90;i++){const r=await p.request({method:'eth_getTransactionReceipt',params:[hash]});if(r)return r;await new Promise(res=>setTimeout(res,2000));}throw new Error('Timed out waiting for confirmation. Check the transaction in your wallet.');}
-$('deployBtn').onclick=async()=>{const p=provider();try{const chain=await getChain();if(chain.toLowerCase()!==CHAIN_HEX)throw new Error('Wrong network. BNB Smart Chain Mainnet required.');if(!$('ack').checked)throw new Error('Please acknowledge the educational-token notice first.');$('deployBtn').disabled=true;status('Preparing the fixed educational mainnet contract…');const r=await fetch('/api/compile-fusdt-mainnet');const j=await r.json();if(!r.ok)throw new Error(j.error||'Compile endpoint failed');status('Contract ready. MetaMask will show the <b>real BNB gas fee</b>. Review that amount before approving.');const txHash=await p.request({method:'eth_sendTransaction',params:[{from:account,data:j.bytecode}]});status(`Deployment submitted.<br><span class="addr">${txHash}</span><br>Waiting for confirmation…`);const receipt=await waitForReceipt(txHash);if(receipt.status==='0x0')throw new Error('Deployment transaction reverted.');contractAddress=receipt.contractAddress;$('contractAddress').textContent=contractAddress;$('explorerLink').href=EXPLORER+'/address/'+contractAddress;$('resultCard').classList.remove('hidden');status('Success — <b>100,000 fUSDT</b> were minted to your connected BSC Mainnet wallet. No peg or market price was created.','ok');}catch(e){status('Deployment failed: '+(e?.message||e),'bad');}finally{await refreshButtons();}};
+$('deployBtn').onclick=async()=>{const p=provider();try{const chain=await getChain();if(chain.toLowerCase()!==CHAIN_HEX)throw new Error('Wrong network. BNB Smart Chain Mainnet required.');if(!$('ack').checked)throw new Error('Please acknowledge the educational-token notice first.');$('deployBtn').disabled=true;status('Preparing the fixed educational mainnet contract…');const r=await fetch('/api/compile-fusdt-mainnet');const j=await r.json();if(!r.ok)throw new Error(j.error||'Compile endpoint failed');status('Contract ready. MetaMask will show the <b>real BNB gas fee</b>. Review that amount before approving.');const txHash=await p.request({method:'eth_sendTransaction',params:[{from:account,data:j.bytecode}]});status(`Deployment submitted.<br><span class="addr">${txHash}</span><br>Waiting for confirmation…`);const receipt=await waitForReceipt(txHash);if(receipt.status==='0x0')throw new Error('Deployment transaction reverted.');contractAddress=receipt.contractAddress;$('contractAddress').textContent=contractAddress;$('explorerLink').href=EXPLORER+'/address/'+contractAddress;$('resultCard').classList.remove('hidden');status('Success — <b>1 decillion fUSDT</b> were minted to your connected BSC Mainnet wallet. No peg or market price was created.','ok');}catch(e){status('Deployment failed: '+(e?.message||e),'bad');}finally{await refreshButtons();}};
 $('copyBtn').onclick=async()=>{if(contractAddress){await navigator.clipboard.writeText(contractAddress);$('copyBtn').textContent='Copied ✓';setTimeout(()=>$('copyBtn').textContent='Copy Contract Address',1500);}};
 $('addTokenBtn').onclick=async()=>{if(!contractAddress)return;try{const ok=await provider().request({method:'wallet_watchAsset',params:{type:'ERC20',options:{address:contractAddress,symbol:'fUSDT',decimals:6}}});if(ok)status('fUSDT mainnet token import request accepted by wallet.','ok');}catch(e){status('Copy the mainnet contract address above and add it manually as a custom token.','bad');}};
 if(window.ethereum){window.ethereum.on?.('accountsChanged',refreshButtons);window.ethereum.on?.('chainChanged',refreshButtons);refreshButtons();}
